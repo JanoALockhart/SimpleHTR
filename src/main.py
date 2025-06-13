@@ -10,6 +10,7 @@ from dataloader_iam import DataLoaderIAM, Batch
 from model import Model, DecoderType
 from preprocessor import Preprocessor
 
+import time
 
 class FilePaths:
     """Filenames and paths to data."""
@@ -30,10 +31,16 @@ def get_img_size(line_mode: bool = False) -> Tuple[int, int]:
     return 128, get_img_height()
 
 
-def write_summary(average_train_loss: List[float], char_error_rates: List[float], word_accuracies: List[float]) -> None:
+def write_summary(average_train_loss: List[float], 
+                  char_error_rates: List[float], 
+                  word_accuracies: List[float], 
+                  time_to_train_epoch: List[float]) -> None:
     """Writes training summary file for NN."""
     with open(FilePaths.fn_summary, 'w') as f:
-        json.dump({'averageTrainLoss': average_train_loss, 'charErrorRates': char_error_rates, 'wordAccuracies': word_accuracies}, f)
+        json.dump({'averageTrainLoss': average_train_loss, 
+                   'charErrorRates': char_error_rates, 
+                   'wordAccuracies': word_accuracies,
+                   'timeToTrainEpoch': time_to_train_epoch}, f)
 
 
 def char_list_from_file() -> List[str]:
@@ -53,6 +60,8 @@ def train(model: Model,
     train_loss_in_epoch = []
     average_train_loss = []
 
+    time_to_train_epoch = []
+
     preprocessor = Preprocessor(get_img_size(line_mode), data_augmentation=True, line_mode=line_mode)
     best_char_error_rate = float('inf')  # best validation character error rate
     no_improvement_since = 0  # number of epochs no improvement of character error rate occurred
@@ -61,8 +70,10 @@ def train(model: Model,
         epoch += 1
         print('Epoch:', epoch)
 
+
         # train
         print('Train NN')
+        start_time = time.time()
         loader.train_set()
         while loader.has_next():
             iter_info = loader.get_iterator_info()
@@ -72,6 +83,7 @@ def train(model: Model,
             print(f'Epoch: {epoch} Batch: {iter_info[0]}/{iter_info[1]} Loss: {loss}')
             train_loss_in_epoch.append(loss)
 
+        end_time = time.time()
         # validate
         char_error_rate, word_accuracy = validate(model, loader, line_mode)
 
@@ -79,7 +91,8 @@ def train(model: Model,
         summary_char_error_rates.append(char_error_rate)
         summary_word_accuracies.append(word_accuracy)
         average_train_loss.append((sum(train_loss_in_epoch)) / len(train_loss_in_epoch))
-        write_summary(average_train_loss, summary_char_error_rates, summary_word_accuracies)
+        time_to_train_epoch.append(end_time - start_time)
+        write_summary(average_train_loss, summary_char_error_rates, summary_word_accuracies, time_to_train_epoch)
 
         # reset train loss list
         train_loss_in_epoch = []
