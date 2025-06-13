@@ -10,7 +10,6 @@ from dataloader_iam import DataLoaderIAM, Batch
 from model import Model, DecoderType
 from preprocessor import Preprocessor
 
-import time
 
 class FilePaths:
     """Filenames and paths to data."""
@@ -207,7 +206,4 @@ def main():
 
 
 if __name__ == '__main__':
-    start_time = time.time()
     main()
-    end_time = time.time()
-    print(f"Execution time: {end_time - start_time:.6f} seconds")
