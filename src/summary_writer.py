@@ -1,17 +1,13 @@
 import json
 
+from dataclasses import dataclass, asdict
+
+@dataclass(frozen=True)
 class EpochSummary:
-    def __init__(self, 
-                 char_error_rate: float, 
-                 word_accuracies: float, 
-                 average_train_loss: float,
-                 time_to_train_epoch: float
-                ):
-        
-        self.char_error_rate:float = char_error_rate
-        self.word_accuracies:float = word_accuracies
-        self.average_train_loss:float = average_train_loss
-        self.time_to_train_epoch:float = time_to_train_epoch 
+    char_error_rate:float
+    word_accuracies:float
+    average_train_loss:float
+    time_to_train_epoch:float 
 
 
 class SummaryWriter:
@@ -19,7 +15,7 @@ class SummaryWriter:
         self.path = path
         self.summaries = []
 
-    def append(self, epoch_summary: EpochSummary):
-       self.summaries.append(epoch_summary)
+    def append(self, epoch_summary: EpochSummary) -> None:
+       self.summaries.append(asdict(epoch_summary))
        with open(self.path, 'w') as file:
            json.dump({self.summaries}, file, ident=4)
