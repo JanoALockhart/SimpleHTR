@@ -173,19 +173,4 @@ class Preprocessor:
         max_text_len = res_imgs[0].shape[0] // 4
         res_gt_texts = [self._truncate_label(gt_text, max_text_len) for gt_text in batch.gt_texts]
         return Batch(res_imgs, res_gt_texts, batch.batch_size)
-
-
-def main():
-    import matplotlib.pyplot as plt
-
-    img = cv2.imread('../data/test.png', cv2.IMREAD_GRAYSCALE)
-    img_aug = Preprocessor((256, 32), data_augmentation=True).process_img(img)
-    plt.subplot(121)
-    plt.imshow(img, cmap='gray')
-    plt.subplot(122)
-    plt.imshow(cv2.transpose(img_aug) + 0.5, cmap='gray', vmin=0, vmax=1)
-    plt.show()
-
-
-if __name__ == '__main__':
-    main()
+    
