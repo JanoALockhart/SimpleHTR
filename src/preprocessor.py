@@ -88,9 +88,6 @@ class Preprocessor:
 
         return Batch(res_imgs, res_gt_texts, batch.batch_size)
 
-    def _rand_odd(self):
-        return random.randint(1, 3) * 2 + 1
-
     def process_img(self, img: np.ndarray) -> np.ndarray:
         """Resize to target size, apply data augmentation."""
 
@@ -165,18 +162,35 @@ class Preprocessor:
 
     def random_erode(self, img, probability = 0.25):
         if random.random() < probability:
-            img = cv2.erode(img, np.ones((3, 3)))
+            img = self.erode(img)
+        return img
+
+    def erode(self, img):
+        kernel = np.ones((3, 3))
+        img = cv2.erode(img, kernel)
         return img
 
     def random_dilate(self, img, probability = 0.25):
         if random.random() < probability:
-            img = cv2.dilate(img, np.ones((3, 3)))
+            img = self.dilate(img)
         return img
+
+    def dilate(self, img):
+        kernel = np.ones((3, 3))
+        img = cv2.dilate(img, kernel)
+        return img
+
+    def _generate_random_odd_number(self):
+        return random.randint(1, 3) * 2 + 1
 
     def random_gaussian_blur(self, img, probability = 0.25):
         if random.random() < probability:
-            random_kernel_size = (self._rand_odd(), self._rand_odd())
-            img = cv2.GaussianBlur(img, random_kernel_size, 0)
+            random_kernel_size = (self._generate_random_odd_number(), self._generate_random_odd_number())
+            img = self.gaussian_blur(img, random_kernel_size)
+        return img
+
+    def gaussian_blur(self, img, kernel_size):
+        img = cv2.GaussianBlur(img, kernel_size, 0)
         return img
 
     def process_batch(self, batch: Batch) -> Batch:
