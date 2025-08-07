@@ -1,12 +1,17 @@
+import numpy
 import cv2
 import matplotlib.pyplot as plt
 from preprocessor import Preprocessor
 
 class PreprocessorTest():
+    preprocessor: Preprocessor
+    img_path: str
+    original_img: numpy.ndarray
+
     def __init__(self, preprocessor, img_path = '../data/line.png'):
         self.preprocessor = preprocessor
         self.img_path = img_path
-        self.base_image = cv2.imread(self.img_path, cv2.IMREAD_GRAYSCALE)
+        self.original_img = cv2.imread(self.img_path, cv2.IMREAD_GRAYSCALE)
 
     def _set_up(self):
         self.original_img = cv2.imread(self.img_path, cv2.IMREAD_GRAYSCALE)
