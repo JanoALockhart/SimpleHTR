@@ -88,7 +88,7 @@ class Preprocessor:
 
         return Batch(res_imgs, res_gt_texts, batch.batch_size)
 
-    def _rand_odd():
+    def _rand_odd(self):
         return random.randint(1, 3) * 2 + 1
 
     def process_img(self, img: np.ndarray) -> np.ndarray:
@@ -102,12 +102,9 @@ class Preprocessor:
         img = img.astype(np.float)
         if self.data_augmentation:
             # photometric data augmentation
-            if random.random() < 0.25:
-                img = cv2.GaussianBlur(img, (self._rand_odd(), self._rand_odd()), 0)
-            if random.random() < 0.25:
-                img = cv2.dilate(img, np.ones((3, 3)))
-            if random.random() < 0.25:
-                img = cv2.erode(img, np.ones((3, 3)))
+            img = self.random_gaussian_blur(img)
+            img = self.random_dilate(img)
+            img = self.random_erode(img)
 
             # geometric data augmentation
             wt, ht = self.img_size
@@ -164,6 +161,22 @@ class Preprocessor:
 
         # convert to range [-1, 1]
         img = img / 255 - 0.5
+        return img
+
+    def random_erode(self, img, probability = 0.25):
+        if random.random() < probability:
+            img = cv2.erode(img, np.ones((3, 3)))
+        return img
+
+    def random_dilate(self, img, probability = 0.25):
+        if random.random() < probability:
+            img = cv2.dilate(img, np.ones((3, 3)))
+        return img
+
+    def random_gaussian_blur(self, img, probability = 0.25):
+        if random.random() < probability:
+            random_kernel_size = (self._rand_odd(), self._rand_odd())
+            img = cv2.GaussianBlur(img, random_kernel_size, 0)
         return img
 
     def process_batch(self, batch: Batch) -> Batch:
