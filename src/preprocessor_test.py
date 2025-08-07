@@ -2,11 +2,15 @@ import cv2
 import matplotlib.pyplot as plt
 from preprocessor import Preprocessor
 
-def test_random_preprocess_image():
-    img = cv2.imread('../data/line.png', cv2.IMREAD_GRAYSCALE)
-    img_aug = Preprocessor((256, 32), data_augmentation=True).process_img(img)
-    img_aug = cv2.transpose(img_aug) + 0.5
-    visualize(img, img_aug)
+class PreprocessorTest():
+    def __init__(self, preprocessor):
+        self.preprocessor = preprocessor
+
+    def test_random_preprocess_image(self):
+        img = cv2.imread('../data/line.png', cv2.IMREAD_GRAYSCALE)
+        img_aug = self.preprocessor.process_img(img)
+        img_aug = cv2.transpose(img_aug) + 0.5
+        visualize(img, img_aug)
 
 def visualize(original, augmented):
   fig = plt.figure()
@@ -20,7 +24,9 @@ def visualize(original, augmented):
   plt.show()
 
 def main():
-    test_random_preprocess_image()
+    preprocessor = Preprocessor((256, 32), data_augmentation=True)
+    test = PreprocessorTest(preprocessor)
+    test.test_random_preprocess_image()
 
 if __name__ == '__main__':
     main()
