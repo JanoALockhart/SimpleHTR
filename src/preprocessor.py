@@ -88,6 +88,9 @@ class Preprocessor:
 
         return Batch(res_imgs, res_gt_texts, batch.batch_size)
 
+    def _rand_odd():
+        return random.randint(1, 3) * 2 + 1
+
     def process_img(self, img: np.ndarray) -> np.ndarray:
         """Resize to target size, apply data augmentation."""
 
@@ -100,9 +103,7 @@ class Preprocessor:
         if self.data_augmentation:
             # photometric data augmentation
             if random.random() < 0.25:
-                def rand_odd():
-                    return random.randint(1, 3) * 2 + 1
-                img = cv2.GaussianBlur(img, (rand_odd(), rand_odd()), 0)
+                img = cv2.GaussianBlur(img, (self._rand_odd(), self._rand_odd()), 0)
             if random.random() < 0.25:
                 img = cv2.dilate(img, np.ones((3, 3)))
             if random.random() < 0.25:
