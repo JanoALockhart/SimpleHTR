@@ -16,7 +16,7 @@ class PreprocessorTest():
 
     def test_random_preprocess_image(self):
         original_img = self._open_image()
-        
+
         img_aug = self.preprocessor.process_img(original_img)
         img_aug = cv2.transpose(img_aug) + 0.5
         
@@ -30,13 +30,14 @@ class PreprocessorTest():
 
         plt.subplot(2,1,2)
         plt.title('Augmented image')
-        plt.imshow(augmented, cmap='gray', vmin=0, vmax=1)
+        plt.imshow(augmented, cmap='gray')
         plt.show()
 
 def main():
     preprocessor = Preprocessor((256, 32), data_augmentation=True)
     test = PreprocessorTest(preprocessor)
     test.test_random_preprocess_image()
+    #test.test_gaussian_blur()
 
 if __name__ == '__main__':
     main()
