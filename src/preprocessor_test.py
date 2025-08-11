@@ -34,6 +34,22 @@ class PreprocessorTest():
             augmented_img = self.preprocessor.gaussian_blur(original_img, kernel)
             self._visualize(original_img, augmented_img, "Gaussian Blur. Kernel=" + str(kernel))
 
+    def test_dilate(self):
+        original_img = self._open_image()
+
+        augmented_img = self.preprocessor.dilate(original_img)
+
+        self._visualize(original_img, augmented_img)
+
+    def test_erode(self):
+        original_img = self._open_image()
+
+        augmented_img = self.preprocessor.erode(original_img)
+
+        self._visualize(original_img, augmented_img)
+
+
+
     def _visualize(self, original, augmented, title = ""):
         fig = plt.figure()
         plt.subplot(2,1,1)
@@ -52,7 +68,10 @@ def main():
     preprocessor = Preprocessor((256, 32), data_augmentation=True)
     test = PreprocessorTest(preprocessor)
     #test.test_random_preprocess_image()
-    test.test_gaussian_blur()
+    #test.test_gaussian_blur()
+    #test.test_dilate()
+    test.test_erode()
 
 if __name__ == '__main__':
     main()
+    
