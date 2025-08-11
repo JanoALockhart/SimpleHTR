@@ -6,23 +6,21 @@ from preprocessor import Preprocessor
 class PreprocessorTest():
     preprocessor: Preprocessor
     img_path: str
-    original_img: numpy.ndarray
 
     def __init__(self, preprocessor, img_path = '../data/line.png'):
         self.preprocessor = preprocessor
         self.img_path = img_path
-        self.original_img = cv2.imread(self.img_path, cv2.IMREAD_GRAYSCALE)
 
-    def _set_up(self):
-        self.original_img = cv2.imread(self.img_path, cv2.IMREAD_GRAYSCALE)
+    def _open_image(self):
+        return cv2.imread(self.img_path, cv2.IMREAD_GRAYSCALE)
 
     def test_random_preprocess_image(self):
-        self._set_up()
-
-        img_aug = self.preprocessor.process_img(self.original_img)
+        original_img = self._open_image()
+        
+        img_aug = self.preprocessor.process_img(original_img)
         img_aug = cv2.transpose(img_aug) + 0.5
         
-        self._visualize(self.original_img, img_aug)
+        self._visualize(original_img, img_aug)
 
     def _visualize(self, original, augmented):
         fig = plt.figure()
