@@ -104,24 +104,27 @@ class Preprocessor:
             img = self.random_erode(img)
 
             # geometric data augmentation
-            wt, ht = self.img_size
-            h, w = img.shape
-            f = min(wt / w, ht / h)
-            fx = f * np.random.uniform(0.75, 1.05)
-            fy = f * np.random.uniform(0.75, 1.05)
+            target_width, target_height = self.img_size
+            image_height, image_width = img.shape
+            scaling_factor = min(target_width / image_width, target_height / image_height)
+            random_scaling_factor_x = scaling_factor * np.random.uniform(0.75, 1.05)
+            random_scaling_factor_y = scaling_factor * np.random.uniform(0.75, 1.05)
 
             # random position around center
-            txc = (wt - w * fx) / 2
-            tyc = (ht - h * fy) / 2
-            freedom_x = max((wt - fx * w) / 2, 0)
-            freedom_y = max((ht - fy * h) / 2, 0)
-            tx = txc + np.random.uniform(-freedom_x, freedom_x)
-            ty = tyc + np.random.uniform(-freedom_y, freedom_y)
+            center_translation_x = (target_width - image_width * random_scaling_factor_x) / 2
+            center_translation_y = (target_height - image_height * random_scaling_factor_y) / 2
+            freedom_x = max((target_width - random_scaling_factor_x * image_width) / 2, 0)
+            freedom_y = max((target_height - random_scaling_factor_y * image_height) / 2, 0)
+            random_translation_x = center_translation_x + np.random.uniform(-freedom_x, freedom_x)
+            random_translation_y = center_translation_y + np.random.uniform(-freedom_y, freedom_y)
 
             # map image into target image
-            M = np.float32([[fx, 0, tx], [0, fy, ty]])
-            target = np.ones(self.img_size[::-1]) * 255
-            img = cv2.warpAffine(img, M, dsize=self.img_size, dst=target, borderMode=cv2.BORDER_TRANSPARENT)
+            transformation_matrix = np.float32([
+                    [random_scaling_factor_x, 0, random_translation_x], 
+                    [0, random_scaling_factor_y, random_translation_y]
+                ])
+            target = np.ones([target_height, target_width]) * 255
+            img = cv2.warpAffine(img, transformation_matrix, dsize=self.img_size, dst=target, borderMode=cv2.BORDER_TRANSPARENT)
 
             # photometric data augmentation
             if random.random() < 0.5:
@@ -134,24 +137,27 @@ class Preprocessor:
         # no data augmentation
         else:
             if self.dynamic_width:
-                ht = self.img_size[1]
-                h, w = img.shape
-                f = ht / h
-                wt = int(f * w + self.padding)
-                wt = wt + (4 - wt) % 4
-                tx = (wt - w * f) / 2
-                ty = 0
+                target_height = self.img_size[1]
+                image_height, image_width = img.shape
+                scaling_factor = target_height / image_height
+                target_width = int(scaling_factor * image_width + self.padding)
+                target_width = target_width + (4 - target_width) % 4
+                random_translation_x = (target_width - image_width * scaling_factor) / 2
+                random_translation_y = 0
             else:
-                wt, ht = self.img_size
-                h, w = img.shape
-                f = min(wt / w, ht / h)
-                tx = (wt - w * f) / 2
-                ty = (ht - h * f) / 2
+                target_width, target_height = self.img_size
+                image_height, image_width = img.shape
+                scaling_factor = min(target_width / image_width, target_height / image_height)
+                random_translation_x = (target_width - image_width * scaling_factor) / 2
+                random_translation_y = (target_height - image_height * scaling_factor) / 2
 
             # map image into target image
-            M = np.float32([[f, 0, tx], [0, f, ty]])
-            target = np.ones([ht, wt]) * 255
-            img = cv2.warpAffine(img, M, dsize=(wt, ht), dst=target, borderMode=cv2.BORDER_TRANSPARENT)
+            transformation_matrix = np.float32([
+                [scaling_factor, 0, random_translation_x], 
+                [0, scaling_factor, random_translation_y]
+            ])
+            target = np.ones([target_height, target_width]) * 255
+            img = cv2.warpAffine(img, transformation_matrix, dsize=(target_width, target_height), dst=target, borderMode=cv2.BORDER_TRANSPARENT)
 
         # transpose for TF
         img = cv2.transpose(img)
