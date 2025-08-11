@@ -21,8 +21,20 @@ class PreprocessorTest():
         img_aug = cv2.transpose(img_aug) + 0.5
         
         self._visualize(original_img, img_aug)
+    
+    def test_gaussian_blur(self):
+        original_img = self._open_image()
 
-    def _visualize(self, original, augmented):
+        kernels = [(3, 3), (3, 5), (3, 7),
+                   (5, 3), (5, 5), (5, 7),
+                   (7, 3), (7 ,5), (7, 7),
+                   ]
+        
+        for kernel in kernels:
+            augmented_img = self.preprocessor.gaussian_blur(original_img, kernel)
+            self._visualize(original_img, augmented_img, "Gaussian Blur. Kernel=" + str(kernel))
+
+    def _visualize(self, original, augmented, title = ""):
         fig = plt.figure()
         plt.subplot(2,1,1)
         plt.title('Original image')
@@ -31,13 +43,16 @@ class PreprocessorTest():
         plt.subplot(2,1,2)
         plt.title('Augmented image')
         plt.imshow(augmented, cmap='gray')
+
+        plt.suptitle(title)
+
         plt.show()
 
 def main():
     preprocessor = Preprocessor((256, 32), data_augmentation=True)
     test = PreprocessorTest(preprocessor)
-    test.test_random_preprocess_image()
-    #test.test_gaussian_blur()
+    #test.test_random_preprocess_image()
+    test.test_gaussian_blur()
 
 if __name__ == '__main__':
     main()
