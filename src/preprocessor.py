@@ -167,9 +167,11 @@ class Preprocessor:
         image_height, image_width = img.shape
 
         scaling_factor = min(target_width / image_width, target_height / image_height)
-
-        random_scaling_factor_x = scaling_factor * np.random.uniform(0.75, 1.05)
-        random_scaling_factor_y = scaling_factor * np.random.uniform(0.75, 1.05)
+        
+        min_scaling_multiplier = 0.75
+        max_scaling_multiplier = 1.05
+        random_scaling_factor_x = scaling_factor * np.random.uniform(min_scaling_multiplier, max_scaling_multiplier)
+        random_scaling_factor_y = scaling_factor * np.random.uniform(min_scaling_multiplier, max_scaling_multiplier)
 
         center_translation_x = (target_width - image_width * random_scaling_factor_x) / 2
         center_translation_y = (target_height - image_height * random_scaling_factor_y) / 2
