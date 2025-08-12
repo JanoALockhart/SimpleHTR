@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from preprocessor import Preprocessor
@@ -11,7 +11,7 @@ class PreprocessorTest():
         self.preprocessor = preprocessor
         self.img_path = img_path
 
-    def _open_image(self):
+    def _open_image(self) -> np.ndarray:
         return cv2.imread(self.img_path, cv2.IMREAD_GRAYSCALE)
 
     def test_random_preprocess_image(self):
@@ -48,7 +48,12 @@ class PreprocessorTest():
 
         self._visualize(original_img, augmented_img, "Erode")
 
+    def test_random_transformation(self):
+        original_img = self._open_image().astype(np.float)
 
+        augmented_img = self.preprocessor.random_transformation(original_img)
+
+        self._visualize(original_img, augmented_img, "Random Transformation")
 
     def _visualize(self, original, augmented, title = ""):
         fig = plt.figure()
@@ -67,10 +72,13 @@ class PreprocessorTest():
 def main():
     preprocessor = Preprocessor((256, 32), data_augmentation=True)
     test = PreprocessorTest(preprocessor)
+    #test = PreprocessorTest(preprocessor, '../data/word.png')
+    
     #test.test_random_preprocess_image()
     #test.test_gaussian_blur()
     #test.test_dilate()
-    test.test_erode()
+    #test.test_erode()
+    test.test_random_transformation()
 
 if __name__ == '__main__':
     main()
