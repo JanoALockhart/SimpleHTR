@@ -124,11 +124,12 @@ class Preprocessor:
 
     def random_noise(self, img, probability = 0.25, max_noise_multiplier = 25):
         if random.random() < probability:
-            img = self.noise(img, max_noise_multiplier)
+            random_noise_multiplier = random.randint(1, max_noise_multiplier)
+            img = self.noise(img, random_noise_multiplier)
         return img
 
-    def noise(self, img: np.ndarray, max_noise_multiplier):
-        noise = (np.random.random(img.shape) - 0.5) * random.randint(1, max_noise_multiplier)
+    def noise(self, img: np.ndarray, noise_multiplier):
+        noise = (np.random.random(img.shape) - 0.5) * noise_multiplier
         img = np.clip(img + noise, 0, 255)
         return img
 
