@@ -54,6 +54,14 @@ class PreprocessorTest():
         augmented_img = self.preprocessor.random_transformation(original_img)
 
         self._visualize(original_img, augmented_img, "Random Transformation")
+    
+    def test_random_transformation_min_scaling(self):
+        original_img = self._open_image().astype(np.float)
+
+        scaling_multiplier = 0.75
+        augmented_img = self.preprocessor.random_transformation(original_img, scaling_multiplier, scaling_multiplier)
+
+        self._visualize(original_img, augmented_img, "Random Transformation. Scaling Multiplier = " + str(scaling_multiplier))
 
     def _visualize(self, original, augmented, title = ""):
         fig = plt.figure()
@@ -78,7 +86,8 @@ def main():
     #test.test_gaussian_blur()
     #test.test_dilate()
     #test.test_erode()
-    test.test_random_transformation()
+    #test.test_random_transformation()
+    test.test_random_transformation_min_scaling()
 
 if __name__ == '__main__':
     main()
