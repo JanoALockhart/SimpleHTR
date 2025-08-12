@@ -114,11 +114,18 @@ class Preprocessor:
             else:
                 img = self.basic_scale_translate_transformation(img)
 
-        # transpose for TF
-        img = cv2.transpose(img)
+        img = self.transpose(img) # transpose for TF
+        img = self.normalize(img)
 
-        # convert to range [-1, 1]
+        return img
+
+    def normalize(self, img):
+        """Convert to range [-1, 1]. Specifically [-0.5, 0.5]"""
         img = img / 255 - 0.5
+        return img
+
+    def transpose(self, img):
+        img = cv2.transpose(img)
         return img
 
     def random_invert(self, img):
