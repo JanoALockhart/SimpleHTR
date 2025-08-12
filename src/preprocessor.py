@@ -125,9 +125,9 @@ class Preprocessor:
                     [random_scaling_factor_x, 0, random_translation_x], 
                     [0, random_scaling_factor_y, random_translation_y]
                 ])
-            target_image = np.ones(self.img_size[::-1]) * 255
-            img = cv2.warpAffine(img, transformation_matrix, dsize=self.img_size, dst=target_image, borderMode=cv2.BORDER_TRANSPARENT)
-
+            target_shape = self.img_size
+            img = self._apply_transformation(img, transformation_matrix, target_shape)
+            
             # photometric data augmentation
             if random.random() < 0.5:
                 img = img * (0.25 + random.random() * 0.75)
