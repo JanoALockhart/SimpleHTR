@@ -123,11 +123,14 @@ class Preprocessor:
         img = img / 255 - 0.5
         return img
 
-    def random_darkening(self, img, probability = 0.5):
+    def random_darkening(self, img, probability = 0.5, min_darkening_factor = 0.25):
         if random.random() < probability:
-            min_darkening_factor = 0.25
             darkening_factor = min_darkening_factor + random.random() * (1 - min_darkening_factor)
-            img = img * darkening_factor
+            img = self.darken(img, darkening_factor)
+        return img
+
+    def darken(self, img, darkening_factor):
+        img = img * darkening_factor
         return img
 
     def basic_scale_translate_transformation(self, img: np.ndarray):
