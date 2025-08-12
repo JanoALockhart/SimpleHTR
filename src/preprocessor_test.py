@@ -85,6 +85,20 @@ class PreprocessorTest():
 
         self._visualize(original_img, augmented_img, "Invert")
 
+    def test_transpose(self):
+        original_img = self._open_image().astype(np.float)
+
+        augmented_img = self.preprocessor.transpose(original_img)
+
+        self._visualize(original_img, augmented_img, "Transpose")
+    
+    def test_normalize(self):
+        original_img = self._open_image().astype(np.float)
+        print(np.min(original_img))
+        print(np.max(original_img))
+        augmented_img = self.preprocessor.normalize(original_img)
+
+        assert -0.5 <= np.min(augmented_img) and np.max(augmented_img) <= 0.5
 
     def _visualize(self, original, augmented, title = "", normalized = False):
         fig = plt.figure()
@@ -117,8 +131,9 @@ def main():
     #test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
     #test.test_darken()
     #test.test_noise()
-    test.test_invert()
-    
+    #test.test_invert()
+    #test.test_transpose()
+    test.test_normalize()
 
 if __name__ == '__main__':
     main()
