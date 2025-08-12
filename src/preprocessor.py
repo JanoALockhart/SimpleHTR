@@ -124,8 +124,12 @@ class Preprocessor:
 
     def random_noise(self, img, probability = 0.25, max_noise_multiplier = 25):
         if random.random() < probability:
-            noise = (np.random.random(img.shape) - 0.5) * random.randint(1, max_noise_multiplier)
-            img = np.clip(img + noise, 0, 255)
+            img = self.noise(img, max_noise_multiplier)
+        return img
+
+    def noise(self, img: np.ndarray, max_noise_multiplier):
+        noise = (np.random.random(img.shape) - 0.5) * random.randint(1, max_noise_multiplier)
+        img = np.clip(img + noise, 0, 255)
         return img
 
     def random_darkening(self, img, probability = 0.5, min_darkening_factor = 0.25):
