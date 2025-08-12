@@ -78,6 +78,13 @@ class PreprocessorTest():
 
         self._visualize(original_img, augmented_img, "Random Transformation. Noise Multiplier = " + str(noise_multiplier))
 
+    def test_invert(self):
+        original_img = self._open_image().astype(np.float)
+
+        augmented_img = self.preprocessor.invert(original_img)
+
+        self._visualize(original_img, augmented_img, "Invert")
+
 
     def _visualize(self, original, augmented, title = "", normalized = False):
         fig = plt.figure()
@@ -109,7 +116,9 @@ def main():
     #test.test_random_transformation_scaling_multiplier(scaling_multiplier=0.75)
     #test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
     #test.test_darken()
-    test.test_noise()
+    #test.test_noise()
+    test.test_invert()
+    
 
 if __name__ == '__main__':
     main()
