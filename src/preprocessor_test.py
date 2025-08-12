@@ -20,7 +20,7 @@ class PreprocessorTest():
         img_aug = self.preprocessor.process_img(original_img)
         img_aug = cv2.transpose(img_aug) + 0.5
         
-        self._visualize(original_img, img_aug)
+        self._visualize(original_img, img_aug, "Combined Techniques")
     
     def test_gaussian_blur(self):
         original_img = self._open_image()
@@ -39,14 +39,14 @@ class PreprocessorTest():
 
         augmented_img = self.preprocessor.dilate(original_img)
 
-        self._visualize(original_img, augmented_img)
+        self._visualize(original_img, augmented_img, "Dilate")
 
     def test_erode(self):
         original_img = self._open_image()
 
         augmented_img = self.preprocessor.erode(original_img)
 
-        self._visualize(original_img, augmented_img)
+        self._visualize(original_img, augmented_img, "Erode")
 
 
 
