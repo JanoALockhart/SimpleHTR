@@ -104,8 +104,7 @@ class Preprocessor:
 
             img = self.random_transformation(img)
 
-            if random.random() < 0.5:
-                img = img * (0.25 + random.random() * 0.75)
+            img = self.random_darkening(img)
             if random.random() < 0.25:
                 img = np.clip(img + (np.random.random(img.shape) - 0.5) * random.randint(1, 25), 0, 255)
             if random.random() < 0.1:
@@ -122,6 +121,11 @@ class Preprocessor:
 
         # convert to range [-1, 1]
         img = img / 255 - 0.5
+        return img
+
+    def random_darkening(self, img):
+        if random.random() < 0.5:
+            img = img * (0.25 + random.random() * 0.75)
         return img
 
     def basic_scale_translate_transformation(self, img: np.ndarray):
