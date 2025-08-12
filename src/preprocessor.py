@@ -106,7 +106,9 @@ class Preprocessor:
             # geometric data augmentation
             target_width, target_height = self.img_size
             image_height, image_width = img.shape
+
             scaling_factor = min(target_width / image_width, target_height / image_height)
+
             random_scaling_factor_x = scaling_factor * np.random.uniform(0.75, 1.05)
             random_scaling_factor_y = scaling_factor * np.random.uniform(0.75, 1.05)
 
@@ -123,8 +125,8 @@ class Preprocessor:
                     [random_scaling_factor_x, 0, random_translation_x], 
                     [0, random_scaling_factor_y, random_translation_y]
                 ])
-            target = np.ones(self.img_size[::-1]) * 255
-            img = cv2.warpAffine(img, transformation_matrix, dsize=self.img_size, dst=target, borderMode=cv2.BORDER_TRANSPARENT)
+            target_image = np.ones(self.img_size[::-1]) * 255
+            img = cv2.warpAffine(img, transformation_matrix, dsize=self.img_size, dst=target_image, borderMode=cv2.BORDER_TRANSPARENT)
 
             # photometric data augmentation
             if random.random() < 0.5:
@@ -139,14 +141,17 @@ class Preprocessor:
             if self.dynamic_width:
                 target_height = self.img_size[1]
                 image_height, image_width = img.shape
+
                 scaling_factor = target_height / image_height
                 target_width = int(scaling_factor * image_width + self.padding)
                 target_width = target_width + (4 - target_width) % 4
                 random_translation_x = (target_width - image_width * scaling_factor) / 2
                 random_translation_y = 0
+
             else:
                 target_width, target_height = self.img_size
                 image_height, image_width = img.shape
+
                 scaling_factor = min(target_width / image_width, target_height / image_height)
                 random_translation_x = (target_width - image_width * scaling_factor) / 2
                 random_translation_y = (target_height - image_height * scaling_factor) / 2
@@ -156,8 +161,10 @@ class Preprocessor:
                 [scaling_factor, 0, random_translation_x], 
                 [0, scaling_factor, random_translation_y]
             ])
-            target = np.ones([target_height, target_width]) * 255
-            img = cv2.warpAffine(img, transformation_matrix, dsize=(target_width, target_height), dst=target, borderMode=cv2.BORDER_TRANSPARENT)
+            
+            target_shape = (target_width, target_height)
+            target_image = np.ones(target_shape[::-1]) * 255
+            img = cv2.warpAffine(img, transformation_matrix, dsize=target_shape, dst=target_image, borderMode=cv2.BORDER_TRANSPARENT)
 
         # transpose for TF
         img = cv2.transpose(img)
