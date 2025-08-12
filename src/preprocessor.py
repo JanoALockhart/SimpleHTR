@@ -117,23 +117,7 @@ class Preprocessor:
         # no data augmentation
         else:
             if self.dynamic_width:
-                target_height = self.img_size[1]
-                image_height, image_width = img.shape
-
-                scaling_factor = target_height / image_height
-                target_width = int(scaling_factor * image_width + self.padding)
-                target_width = target_width + (4 - target_width) % 4
-                random_translation_x = (target_width - image_width * scaling_factor) / 2
-                random_translation_y = 0
-
-                # map image into target image
-                transformation_matrix = np.float32([
-                    [scaling_factor, 0, random_translation_x], 
-                    [0, scaling_factor, random_translation_y]
-                ])
-                
-                target_shape = (target_width, target_height)
-                img = self._apply_transformation(img, transformation_matrix, target_shape)
+                img = self.dynamic_width_transformation(img)
 
             else:
                 target_width, target_height = self.img_size
@@ -157,6 +141,26 @@ class Preprocessor:
 
         # convert to range [-1, 1]
         img = img / 255 - 0.5
+        return img
+
+    def dynamic_width_transformation(self, img):
+        target_height = self.img_size[1]
+        image_height, image_width = img.shape
+
+        scaling_factor = target_height / image_height
+        target_width = int(scaling_factor * image_width + self.padding)
+        target_width = target_width + (4 - target_width) % 4
+        random_translation_x = (target_width - image_width * scaling_factor) / 2
+        random_translation_y = 0
+
+                # map image into target image
+        transformation_matrix = np.float32([
+                    [scaling_factor, 0, random_translation_x], 
+                    [0, scaling_factor, random_translation_y]
+                ])
+                
+        target_shape = (target_width, target_height)
+        img = self._apply_transformation(img, transformation_matrix, target_shape)
         return img
 
     def random_transformation(self, img):
