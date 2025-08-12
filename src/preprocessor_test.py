@@ -20,7 +20,7 @@ class PreprocessorTest():
         img_aug = self.preprocessor.process_img(original_img)
         img_aug = cv2.transpose(img_aug) + 0.5
         
-        self._visualize(original_img, img_aug, "Combined Techniques")
+        self._visualize(original_img, img_aug, title="Combined Techniques", normalized=True)
     
     def test_gaussian_blur(self):
         original_img = self._open_image()
@@ -62,7 +62,16 @@ class PreprocessorTest():
 
         self._visualize(original_img, augmented_img, "Random Transformation. Scaling Multiplier = " + str(scaling_multiplier))
 
-    def _visualize(self, original, augmented, title = ""):
+    def test_darken(self):
+        original_img = self._open_image().astype(np.float)
+
+        darkening_factor = 0.25
+
+        augmented_img = self.preprocessor.darken(original_img, darkening_factor)
+        self._visualize(original_img, augmented_img, "Darkening. Darkening Factor = " + str(darkening_factor))
+
+
+    def _visualize(self, original, augmented, title = "", normalized = False):
         fig = plt.figure()
         plt.subplot(2,1,1)
         plt.title('Original image')
@@ -70,7 +79,10 @@ class PreprocessorTest():
 
         plt.subplot(2,1,2)
         plt.title('Augmented image')
-        plt.imshow(augmented, cmap='gray')
+        vmax = 255
+        if normalized:
+            vmax=1
+        plt.imshow(augmented, cmap='gray', vmin=0, vmax=vmax)
 
         plt.suptitle(title)
 
@@ -84,10 +96,11 @@ def main():
     #test.test_random_preprocess_image()
     #test.test_gaussian_blur()
     #test.test_dilate()
-    #test.test_erode()
+    #est.test_erode()
     #test.test_random_transformation()
     #test.test_random_transformation_scaling_multiplier(scaling_multiplier=0.75)
-    test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
+    #test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
+    test.test_darken()
 
 if __name__ == '__main__':
     main()
