@@ -95,18 +95,15 @@ class Preprocessor:
         if img is None:
             img = np.zeros(self.img_size[::-1])
 
-        # data augmentation
         img = img.astype(np.float)
+
         if self.data_augmentation:
-            # photometric data augmentation
             img = self.random_gaussian_blur(img)
             img = self.random_dilate(img)
             img = self.random_erode(img)
 
-            # geometric data augmentation
             img = self.random_transformation(img)
-            
-            # photometric data augmentation
+
             if random.random() < 0.5:
                 img = img * (0.25 + random.random() * 0.75)
             if random.random() < 0.25:
@@ -114,13 +111,12 @@ class Preprocessor:
             if random.random() < 0.1:
                 img = 255 - img
 
-        # no data augmentation
         else:
             if self.dynamic_width:
                 img = self.dynamic_width_transformation(img)
             else:
                 img = self.basic_scale_translate_transformation(img)
-                
+
         # transpose for TF
         img = cv2.transpose(img)
 
@@ -128,45 +124,45 @@ class Preprocessor:
         img = img / 255 - 0.5
         return img
 
-    def basic_scale_translate_transformation(self, img):
+    def basic_scale_translate_transformation(self, img: np.ndarray):
         target_width, target_height = self.img_size
         image_height, image_width = img.shape
 
         scaling_factor = min(target_width / image_width, target_height / image_height)
-        random_translation_x = (target_width - image_width * scaling_factor) / 2
-        random_translation_y = (target_height - image_height * scaling_factor) / 2
+        translation_x = (target_width - image_width * scaling_factor) / 2
+        translation_y = (target_height - image_height * scaling_factor) / 2
 
-                # map image into target image
         transformation_matrix = np.float32([
-                    [scaling_factor, 0, random_translation_x], 
-                    [0, scaling_factor, random_translation_y]
+                    [scaling_factor, 0, translation_x], 
+                    [0, scaling_factor, translation_y]
                 ])
                 
         target_shape = (target_width, target_height)
         img = self._apply_transformation(img, transformation_matrix, target_shape)
+
         return img
 
-    def dynamic_width_transformation(self, img):
+    def dynamic_width_transformation(self, img: np.ndarray):
         target_height = self.img_size[1]
         image_height, image_width = img.shape
 
         scaling_factor = target_height / image_height
         target_width = int(scaling_factor * image_width + self.padding)
         target_width = target_width + (4 - target_width) % 4
-        random_translation_x = (target_width - image_width * scaling_factor) / 2
-        random_translation_y = 0
+        translation_x = (target_width - image_width * scaling_factor) / 2
+        translation_y = 0
 
-                # map image into target image
         transformation_matrix = np.float32([
-                    [scaling_factor, 0, random_translation_x], 
-                    [0, scaling_factor, random_translation_y]
+                    [scaling_factor, 0, translation_x], 
+                    [0, scaling_factor, translation_y]
                 ])
                 
         target_shape = (target_width, target_height)
         img = self._apply_transformation(img, transformation_matrix, target_shape)
+
         return img
 
-    def random_transformation(self, img):
+    def random_transformation(self, img: np.ndarray):
         target_width, target_height = self.img_size
         image_height, image_width = img.shape
 
@@ -175,7 +171,6 @@ class Preprocessor:
         random_scaling_factor_x = scaling_factor * np.random.uniform(0.75, 1.05)
         random_scaling_factor_y = scaling_factor * np.random.uniform(0.75, 1.05)
 
-            # random position around center
         center_translation_x = (target_width - image_width * random_scaling_factor_x) / 2
         center_translation_y = (target_height - image_height * random_scaling_factor_y) / 2
         freedom_x = max((target_width - random_scaling_factor_x * image_width) / 2, 0)
@@ -183,13 +178,14 @@ class Preprocessor:
         random_translation_x = center_translation_x + np.random.uniform(-freedom_x, freedom_x)
         random_translation_y = center_translation_y + np.random.uniform(-freedom_y, freedom_y)
 
-            # map image into target image
         transformation_matrix = np.float32([
                     [random_scaling_factor_x, 0, random_translation_x], 
                     [0, random_scaling_factor_y, random_translation_y]
                 ])
+        
         target_shape = self.img_size
         img = self._apply_transformation(img, transformation_matrix, target_shape)
+
         return img
 
     def _apply_transformation(self, img, transformation_matrix, target_shape):
