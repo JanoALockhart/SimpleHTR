@@ -163,14 +163,18 @@ class Preprocessor:
             ])
             
             target_shape = (target_width, target_height)
-            target_image = np.ones(target_shape[::-1]) * 255
-            img = cv2.warpAffine(img, transformation_matrix, dsize=target_shape, dst=target_image, borderMode=cv2.BORDER_TRANSPARENT)
+            img = self._apply_transformation(img, transformation_matrix, target_shape)
 
         # transpose for TF
         img = cv2.transpose(img)
 
         # convert to range [-1, 1]
         img = img / 255 - 0.5
+        return img
+
+    def _apply_transformation(self, img, transformation_matrix, target_shape):
+        target_image = np.ones(target_shape[::-1]) * 255
+        img = cv2.warpAffine(img, transformation_matrix, dsize=target_shape, dst=target_image, borderMode=cv2.BORDER_TRANSPARENT)
         return img
 
     def random_erode(self, img, probability = 0.25):
