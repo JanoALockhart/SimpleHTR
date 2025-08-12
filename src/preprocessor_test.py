@@ -70,6 +70,14 @@ class PreprocessorTest():
             augmented_img = self.preprocessor.darken(original_img, darkening_factor)
             self._visualize(original_img, augmented_img, "Darkening. Darkening Factor = " + str(darkening_factor))
 
+    def test_noise(self):
+        original_img = self._open_image().astype(np.float)
+
+        noise_multiplier = 25
+        augmented_img = self.preprocessor.noise(original_img, noise_multiplier = noise_multiplier)
+
+        self._visualize(original_img, augmented_img, "Random Transformation. Noise Multiplier = " + str(noise_multiplier))
+
 
     def _visualize(self, original, augmented, title = "", normalized = False):
         fig = plt.figure()
@@ -100,7 +108,8 @@ def main():
     #test.test_random_transformation()
     #test.test_random_transformation_scaling_multiplier(scaling_multiplier=0.75)
     #test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
-    test.test_darken()
+    #test.test_darken()
+    test.test_noise()
 
 if __name__ == '__main__':
     main()
