@@ -9,7 +9,7 @@ from dataloader_iam import Batch
 
 class Preprocessor:
     def __init__(self,
-                 img_size: Tuple[int, int],
+                 target_img_size: Tuple[int, int],
                  padding: int = 0,
                  dynamic_width: bool = False,
                  data_augmentation: bool = False,
@@ -19,7 +19,7 @@ class Preprocessor:
         # when padding is on, we need dynamic width enabled
         assert not (padding > 0 and not dynamic_width)
 
-        self.img_size = img_size
+        self.target_img_size = target_img_size
         self.padding = padding
         self.dynamic_width = dynamic_width
         self.data_augmentation = data_augmentation
@@ -93,7 +93,7 @@ class Preprocessor:
 
         # there are damaged files in IAM dataset - just use black image instead
         if img is None:
-            img = np.zeros(self.img_size[::-1])
+            img = np.zeros(self.target_img_size[::-1])
 
         img = img.astype(np.float)
 
@@ -159,7 +159,7 @@ class Preprocessor:
         return img
 
     def basic_scale_translate_transformation(self, img: np.ndarray):
-        target_width, target_height = self.img_size
+        target_width, target_height = self.target_img_size
         image_height, image_width = img.shape
 
         scaling_factor = min(target_width / image_width, target_height / image_height)
@@ -177,7 +177,7 @@ class Preprocessor:
         return img
 
     def dynamic_width_transformation(self, img: np.ndarray):
-        target_height = self.img_size[1]
+        target_height = self.target_img_size[1]
         image_height, image_width = img.shape
 
         scaling_factor = target_height / image_height
@@ -197,7 +197,7 @@ class Preprocessor:
         return img
 
     def random_transformation(self, img: np.ndarray, min_scaling_multiplier = 0.75, max_scaling_multiplier = 1.05):
-        target_width, target_height = self.img_size
+        target_width, target_height = self.target_img_size
         image_height, image_width = img.shape
 
         scaling_factor = min(target_width / image_width, target_height / image_height)
@@ -217,7 +217,7 @@ class Preprocessor:
                     [0, random_scaling_factor_y, random_translation_y]
                 ])
         
-        target_shape = self.img_size
+        target_shape = self.target_img_size
         img = self._apply_transformation(img, transformation_matrix, target_shape)
 
         return img
