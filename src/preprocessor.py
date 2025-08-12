@@ -123,7 +123,7 @@ class Preprocessor:
                     [random_scaling_factor_x, 0, random_translation_x], 
                     [0, random_scaling_factor_y, random_translation_y]
                 ])
-            target = np.ones([target_height, target_width]) * 255
+            target = np.ones(self.img_size[::-1]) * 255
             img = cv2.warpAffine(img, transformation_matrix, dsize=self.img_size, dst=target, borderMode=cv2.BORDER_TRANSPARENT)
 
             # photometric data augmentation
