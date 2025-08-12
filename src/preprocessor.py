@@ -125,8 +125,8 @@ class Preprocessor:
 
     def random_darkening(self, img, probability = 0.5, min_darkening_factor = 0.25):
         if random.random() < probability:
-            darkening_factor = min_darkening_factor + random.random() * (1 - min_darkening_factor)
-            img = self.darken(img, darkening_factor)
+            random_darkening_factor = min_darkening_factor + random.random() * (1 - min_darkening_factor)
+            img = self.darken(img, random_darkening_factor)
         return img
 
     def darken(self, img, darkening_factor):
