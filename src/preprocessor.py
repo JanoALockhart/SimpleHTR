@@ -106,8 +106,7 @@ class Preprocessor:
 
             img = self.random_darkening(img)
             img = self.random_noise(img)
-            if random.random() < 0.1:
-                img = 255 - img
+            img = self.random_invert(img)
 
         else:
             if self.dynamic_width:
@@ -120,6 +119,15 @@ class Preprocessor:
 
         # convert to range [-1, 1]
         img = img / 255 - 0.5
+        return img
+
+    def random_invert(self, img):
+        if random.random() < 0.1:
+            img = self.invert(img)
+        return img
+
+    def invert(self, img):
+        img = 255 - img
         return img
 
     def random_noise(self, img, probability = 0.25, max_noise_multiplier = 25):
