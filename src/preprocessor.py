@@ -104,29 +104,7 @@ class Preprocessor:
             img = self.random_erode(img)
 
             # geometric data augmentation
-            target_width, target_height = self.img_size
-            image_height, image_width = img.shape
-
-            scaling_factor = min(target_width / image_width, target_height / image_height)
-
-            random_scaling_factor_x = scaling_factor * np.random.uniform(0.75, 1.05)
-            random_scaling_factor_y = scaling_factor * np.random.uniform(0.75, 1.05)
-
-            # random position around center
-            center_translation_x = (target_width - image_width * random_scaling_factor_x) / 2
-            center_translation_y = (target_height - image_height * random_scaling_factor_y) / 2
-            freedom_x = max((target_width - random_scaling_factor_x * image_width) / 2, 0)
-            freedom_y = max((target_height - random_scaling_factor_y * image_height) / 2, 0)
-            random_translation_x = center_translation_x + np.random.uniform(-freedom_x, freedom_x)
-            random_translation_y = center_translation_y + np.random.uniform(-freedom_y, freedom_y)
-
-            # map image into target image
-            transformation_matrix = np.float32([
-                    [random_scaling_factor_x, 0, random_translation_x], 
-                    [0, random_scaling_factor_y, random_translation_y]
-                ])
-            target_shape = self.img_size
-            img = self._apply_transformation(img, transformation_matrix, target_shape)
+            img = self.random_transformation(img)
             
             # photometric data augmentation
             if random.random() < 0.5:
@@ -170,6 +148,32 @@ class Preprocessor:
 
         # convert to range [-1, 1]
         img = img / 255 - 0.5
+        return img
+
+    def random_transformation(self, img):
+        target_width, target_height = self.img_size
+        image_height, image_width = img.shape
+
+        scaling_factor = min(target_width / image_width, target_height / image_height)
+
+        random_scaling_factor_x = scaling_factor * np.random.uniform(0.75, 1.05)
+        random_scaling_factor_y = scaling_factor * np.random.uniform(0.75, 1.05)
+
+            # random position around center
+        center_translation_x = (target_width - image_width * random_scaling_factor_x) / 2
+        center_translation_y = (target_height - image_height * random_scaling_factor_y) / 2
+        freedom_x = max((target_width - random_scaling_factor_x * image_width) / 2, 0)
+        freedom_y = max((target_height - random_scaling_factor_y * image_height) / 2, 0)
+        random_translation_x = center_translation_x + np.random.uniform(-freedom_x, freedom_x)
+        random_translation_y = center_translation_y + np.random.uniform(-freedom_y, freedom_y)
+
+            # map image into target image
+        transformation_matrix = np.float32([
+                    [random_scaling_factor_x, 0, random_translation_x], 
+                    [0, random_scaling_factor_y, random_translation_y]
+                ])
+        target_shape = self.img_size
+        img = self._apply_transformation(img, transformation_matrix, target_shape)
         return img
 
     def _apply_transformation(self, img, transformation_matrix, target_shape):
