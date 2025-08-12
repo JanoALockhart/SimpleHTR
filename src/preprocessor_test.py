@@ -65,10 +65,10 @@ class PreprocessorTest():
     def test_darken(self):
         original_img = self._open_image().astype(np.float)
 
-        darkening_factor = 0.25
-
-        augmented_img = self.preprocessor.darken(original_img, darkening_factor)
-        self._visualize(original_img, augmented_img, "Darkening. Darkening Factor = " + str(darkening_factor))
+        darkening_factors = (0.25, 0.5, 0.75, 1)
+        for darkening_factor in darkening_factors:
+            augmented_img = self.preprocessor.darken(original_img, darkening_factor)
+            self._visualize(original_img, augmented_img, "Darkening. Darkening Factor = " + str(darkening_factor))
 
 
     def _visualize(self, original, augmented, title = "", normalized = False):
