@@ -118,29 +118,32 @@ class Preprocessor:
         else:
             if self.dynamic_width:
                 img = self.dynamic_width_transformation(img)
-
             else:
-                target_width, target_height = self.img_size
-                image_height, image_width = img.shape
-
-                scaling_factor = min(target_width / image_width, target_height / image_height)
-                random_translation_x = (target_width - image_width * scaling_factor) / 2
-                random_translation_y = (target_height - image_height * scaling_factor) / 2
-
-                # map image into target image
-                transformation_matrix = np.float32([
-                    [scaling_factor, 0, random_translation_x], 
-                    [0, scaling_factor, random_translation_y]
-                ])
+                img = self.basic_scale_translate_transformation(img)
                 
-                target_shape = (target_width, target_height)
-                img = self._apply_transformation(img, transformation_matrix, target_shape)
-
         # transpose for TF
         img = cv2.transpose(img)
 
         # convert to range [-1, 1]
         img = img / 255 - 0.5
+        return img
+
+    def basic_scale_translate_transformation(self, img):
+        target_width, target_height = self.img_size
+        image_height, image_width = img.shape
+
+        scaling_factor = min(target_width / image_width, target_height / image_height)
+        random_translation_x = (target_width - image_width * scaling_factor) / 2
+        random_translation_y = (target_height - image_height * scaling_factor) / 2
+
+                # map image into target image
+        transformation_matrix = np.float32([
+                    [scaling_factor, 0, random_translation_x], 
+                    [0, scaling_factor, random_translation_y]
+                ])
+                
+        target_shape = (target_width, target_height)
+        img = self._apply_transformation(img, transformation_matrix, target_shape)
         return img
 
     def dynamic_width_transformation(self, img):
