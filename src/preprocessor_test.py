@@ -97,7 +97,8 @@ class PreprocessorTest():
         print(np.min(original_img))
         print(np.max(original_img))
         augmented_img = self.preprocessor.normalize(original_img)
-
+        print(np.min(augmented_img))
+        print(np.max(augmented_img))
         assert -0.5 <= np.min(augmented_img) and np.max(augmented_img) <= 0.5
 
     def _visualize(self, original, augmented, title = "", normalized = False):
