@@ -1,15 +1,23 @@
 import os
 import sys
+import cv2
+import editdistance
+import time
+
 from typing import List, Tuple
+from path import Path
 
 import numpy as np
 import tensorflow as tf
 
+from settings import FilePaths
 from dataloader_iam import Batch
+from preprocessor import Preprocessor
+from summary_writer import SummaryWriter, EpochSummary
+from dataloader_iam import DataLoaderIAM
 
 # Disable eager mode
 tf.compat.v1.disable_eager_execution()
-
 
 class DecoderType:
     """CTC decoder types."""
@@ -302,3 +310,123 @@ class Model:
         """Save model to file."""
         self.snap_ID += 1
         self.saver.save(self.sess, '../model/snapshot', global_step=self.snap_ID)
+
+    def get_img_height(self) -> int:
+        """Fixed height for NN."""
+        return 32
+
+    def get_img_size(self, line_mode: bool = False) -> Tuple[int, int]:
+        """Height is fixed for NN, width is set according to training mode (single words or text lines)."""
+        if line_mode:
+            return 256, self.get_img_height()
+        return 128, self.get_img_height()
+
+    def train(self,
+            loader: DataLoaderIAM,
+            line_mode: bool,
+            early_stopping: int = 25) -> None:
+        """Trains NN."""
+        epoch = 0  # number of training epochs since start
+        summary_writer = SummaryWriter(FilePaths.fn_summary)
+
+        train_loss_in_epoch = []
+
+        preprocessor = Preprocessor(self.get_img_size(line_mode), data_augmentation=True, line_mode=line_mode)
+        best_char_error_rate = float('inf')  # best validation character error rate
+        no_improvement_since = 0  # number of epochs no improvement of character error rate occurred
+        # stop training after this number of epochs without improvement
+        while True:
+            epoch += 1
+            print('Epoch:', epoch)
+
+
+            # train
+            print('Train NN')
+            start_time = time.time()
+            loader.train_set()
+            while loader.has_next():
+                iter_info = loader.get_iterator_info()
+                batch = loader.get_next()
+                batch = preprocessor.process_batch(batch)
+                loss = self.train_batch(batch)
+                print(f'Epoch: {epoch} Batch: {iter_info[0]}/{iter_info[1]} Loss: {loss}')
+                train_loss_in_epoch.append(loss)
+
+            end_time = time.time()
+            # validate
+            char_error_rate, word_accuracy = self.validate(loader, line_mode)
+
+            # write summary
+            epoch_summary = EpochSummary(
+                epoch = epoch,
+                char_error_rate = char_error_rate,
+                word_accuracies = word_accuracy,
+                average_train_loss = sum(train_loss_in_epoch) / len(train_loss_in_epoch),
+                time_to_train_epoch = end_time-start_time
+            )
+            summary_writer.append(epoch_summary)
+
+            # reset train loss list
+            train_loss_in_epoch = []
+
+            # if best validation accuracy so far, save model parameters
+            if char_error_rate < best_char_error_rate:
+                print('Character error rate improved, save model')
+                best_char_error_rate = char_error_rate
+                no_improvement_since = 0
+                self.save()
+            else:
+                print(f'Character error rate not improved, best so far: {best_char_error_rate * 100.0}%')
+                no_improvement_since += 1
+
+            # stop training if no more improvement in the last x epochs
+            if no_improvement_since >= early_stopping:
+                print(f'No more improvement for {early_stopping} epochs. Training stopped.')
+                break
+
+
+    def validate(self, loader: DataLoaderIAM, line_mode: bool) -> Tuple[float, float]:
+        """Validates NN."""
+        print('Validate NN')
+        loader.validation_set()
+        preprocessor = Preprocessor(self.get_img_size(line_mode), line_mode=line_mode)
+        num_char_err = 0
+        num_char_total = 0
+        num_word_ok = 0
+        num_word_total = 0
+        while loader.has_next():
+            iter_info = loader.get_iterator_info()
+            print(f'Batch: {iter_info[0]} / {iter_info[1]}')
+            batch = loader.get_next()
+            batch = preprocessor.process_batch(batch)
+            recognized, _ = self.infer_batch(batch)
+
+            print('Ground truth -> Recognized')
+            for i in range(len(recognized)):
+                num_word_ok += 1 if batch.gt_texts[i] == recognized[i] else 0
+                num_word_total += 1
+                dist = editdistance.eval(recognized[i], batch.gt_texts[i])
+                num_char_err += dist
+                num_char_total += len(batch.gt_texts[i])
+                print('[OK]' if dist == 0 else '[ERR:%d]' % dist, '"' + batch.gt_texts[i] + '"', '->',
+                    '"' + recognized[i] + '"')
+
+        # print validation result
+        char_error_rate = num_char_err / num_char_total
+        word_accuracy = num_word_ok / num_word_total
+        print(f'Character error rate: {char_error_rate * 100.0}%. Word accuracy: {word_accuracy * 100.0}%.')
+        return char_error_rate, word_accuracy
+
+
+    def infer(self, fn_img: Path) -> None:
+        """Recognizes text in image provided by file path."""
+        img = cv2.imread(fn_img, cv2.IMREAD_GRAYSCALE)
+        assert img is not None
+
+        preprocessor = Preprocessor(self.get_img_size(), dynamic_width=True, padding=16)
+        img = preprocessor.process_img(img)
+
+        batch = Batch([img], None, 1)
+        recognized, probability = self.infer_batch(batch, True)
+        print(f'Recognized: "{recognized[0]}"')
+        print(f'Probability: {probability[0]}')
