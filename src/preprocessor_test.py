@@ -31,20 +31,20 @@ class PreprocessorTest():
                    ]
         
         for kernel in kernels:
-            augmented_img = self.preprocessor.gaussian_blur(original_img, kernel)
+            augmented_img = self.preprocessor._gaussian_blur(original_img, kernel)
             self._visualize(original_img, augmented_img, "Gaussian Blur. Kernel=" + str(kernel))
 
     def test_dilate(self):
         original_img = self._open_image()
 
-        augmented_img = self.preprocessor.dilate(original_img)
+        augmented_img = self.preprocessor._dilate(original_img)
 
         self._visualize(original_img, augmented_img, "Dilate")
 
     def test_erode(self):
         original_img = self._open_image()
 
-        augmented_img = self.preprocessor.erode(original_img)
+        augmented_img = self.preprocessor._erode(original_img)
 
         self._visualize(original_img, augmented_img, "Erode")
 
@@ -52,13 +52,13 @@ class PreprocessorTest():
         original_img = self._open_image().astype(np.float)
 
         for i in range(3):
-            augmented_img = self.preprocessor.random_transformation(original_img)
+            augmented_img = self.preprocessor._random_transformation(original_img)
             self._visualize(original_img, augmented_img, "Random Transformation")
     
     def test_random_transformation_scaling_multiplier(self, scaling_multiplier):
         original_img = self._open_image().astype(np.float)
 
-        augmented_img = self.preprocessor.random_transformation(original_img, scaling_multiplier, scaling_multiplier)
+        augmented_img = self.preprocessor._random_transformation(original_img, scaling_multiplier, scaling_multiplier)
 
         self._visualize(original_img, augmented_img, "Random Transformation. Scaling Multiplier = " + str(scaling_multiplier))
 
@@ -67,28 +67,28 @@ class PreprocessorTest():
 
         darkening_factors = (0.25, 0.5, 0.75, 1)
         for darkening_factor in darkening_factors:
-            augmented_img = self.preprocessor.darken(original_img, darkening_factor)
+            augmented_img = self.preprocessor._darken(original_img, darkening_factor)
             self._visualize(original_img, augmented_img, "Darkening. Darkening Factor = " + str(darkening_factor))
 
     def test_noise(self):
         original_img = self._open_image().astype(np.float)
 
         noise_multiplier = 25
-        augmented_img = self.preprocessor.noise(original_img, noise_multiplier = noise_multiplier)
+        augmented_img = self.preprocessor._noise(original_img, noise_multiplier = noise_multiplier)
 
         self._visualize(original_img, augmented_img, "Random Transformation. Noise Multiplier = " + str(noise_multiplier))
 
     def test_invert(self):
         original_img = self._open_image().astype(np.float)
 
-        augmented_img = self.preprocessor.invert(original_img)
+        augmented_img = self.preprocessor._invert(original_img)
 
         self._visualize(original_img, augmented_img, "Invert")
 
     def test_transpose(self):
         original_img = self._open_image().astype(np.float)
 
-        augmented_img = self.preprocessor.transpose(original_img)
+        augmented_img = self.preprocessor._transpose(original_img)
 
         self._visualize(original_img, augmented_img, "Transpose")
     
@@ -96,7 +96,7 @@ class PreprocessorTest():
         original_img = self._open_image().astype(np.float)
         print(np.min(original_img))
         print(np.max(original_img))
-        augmented_img = self.preprocessor.normalize(original_img)
+        augmented_img = self.preprocessor._normalize(original_img)
         print(np.min(augmented_img))
         print(np.max(augmented_img))
         assert -0.5 <= np.min(augmented_img) and np.max(augmented_img) <= 0.5
@@ -123,17 +123,17 @@ def main():
     test = PreprocessorTest(preprocessor)
     #test = PreprocessorTest(preprocessor, '../data/word.png')
     
-    #test.test_random_preprocess_image()
-    #test.test_gaussian_blur()
-    #test.test_dilate()
-    #est.test_erode()
-    #test.test_random_transformation()
-    #test.test_random_transformation_scaling_multiplier(scaling_multiplier=0.75)
-    #test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
-    #test.test_darken()
-    #test.test_noise()
-    #test.test_invert()
-    #test.test_transpose()
+    test.test_random_preprocess_image()
+    test.test_gaussian_blur()
+    test.test_dilate()
+    test.test_erode()
+    test.test_random_transformation()
+    test.test_random_transformation_scaling_multiplier(scaling_multiplier=0.75)
+    test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
+    test.test_darken()
+    test.test_noise()
+    test.test_invert()
+    test.test_transpose()
     test.test_normalize()
 
 if __name__ == '__main__':

@@ -98,67 +98,67 @@ class Preprocessor:
         img = img.astype(np.float)
 
         if self.data_augmentation:
-            img = self.random_gaussian_blur(img)
-            img = self.random_dilate(img)
-            img = self.random_erode(img)
+            img = self._random_gaussian_blur(img)
+            img = self._random_dilate(img)
+            img = self._random_erode(img)
 
-            img = self.random_transformation(img)
+            img = self._random_transformation(img)
 
-            img = self.random_darkening(img)
-            img = self.random_noise(img)
-            img = self.random_invert(img)
+            img = self._random_darkening(img)
+            img = self._random_noise(img)
+            img = self._random_invert(img)
 
         else:
             if self.dynamic_width:
-                img = self.dynamic_width_transformation(img)
+                img = self._dynamic_width_transformation(img)
             else:
-                img = self.basic_scale_translate_transformation(img)
+                img = self._basic_scale_translate_transformation(img)
 
-        img = self.transpose(img) # transpose for TF
-        img = self.normalize(img)
+        img = self._transpose(img) # transpose for TF
+        img = self._normalize(img)
 
         return img
 
-    def normalize(self, img):
+    def _normalize(self, img):
         """Convert to range [-1, 1]. Specifically [-0.5, 0.5]"""
         img = img / 255 - 0.5
         return img
 
-    def transpose(self, img):
+    def _transpose(self, img):
         img = cv2.transpose(img)
         return img
 
-    def random_invert(self, img):
+    def _random_invert(self, img):
         if random.random() < 0.1:
-            img = self.invert(img)
+            img = self._invert(img)
         return img
 
-    def invert(self, img):
+    def _invert(self, img):
         img = 255 - img
         return img
 
-    def random_noise(self, img, probability = 0.25, max_noise_multiplier = 25):
+    def _random_noise(self, img, probability = 0.25, max_noise_multiplier = 25):
         if random.random() < probability:
             random_noise_multiplier = random.randint(1, max_noise_multiplier)
-            img = self.noise(img, random_noise_multiplier)
+            img = self._noise(img, random_noise_multiplier)
         return img
 
-    def noise(self, img: np.ndarray, noise_multiplier):
+    def _noise(self, img: np.ndarray, noise_multiplier):
         noise = (np.random.random(img.shape) - 0.5) * noise_multiplier
         img = np.clip(img + noise, 0, 255)
         return img
 
-    def random_darkening(self, img, probability = 0.5, min_darkening_factor = 0.25):
+    def _random_darkening(self, img, probability = 0.5, min_darkening_factor = 0.25):
         if random.random() < probability:
             random_darkening_factor = min_darkening_factor + random.random() * (1 - min_darkening_factor)
-            img = self.darken(img, random_darkening_factor)
+            img = self._darken(img, random_darkening_factor)
         return img
 
-    def darken(self, img, darkening_factor):
+    def _darken(self, img, darkening_factor):
         img = img * darkening_factor
         return img
 
-    def basic_scale_translate_transformation(self, img: np.ndarray):
+    def _basic_scale_translate_transformation(self, img: np.ndarray):
         target_width, target_height = self.target_img_size
         image_height, image_width = img.shape
 
@@ -176,7 +176,7 @@ class Preprocessor:
 
         return img
 
-    def dynamic_width_transformation(self, img: np.ndarray):
+    def _dynamic_width_transformation(self, img: np.ndarray):
         target_height = self.target_img_size[1]
         image_height, image_width = img.shape
 
@@ -196,7 +196,7 @@ class Preprocessor:
 
         return img
 
-    def random_transformation(self, img: np.ndarray, min_scaling_multiplier = 0.75, max_scaling_multiplier = 1.05):
+    def _random_transformation(self, img: np.ndarray, min_scaling_multiplier = 0.75, max_scaling_multiplier = 1.05):
         target_width, target_height = self.target_img_size
         image_height, image_width = img.shape
 
@@ -227,22 +227,22 @@ class Preprocessor:
         img = cv2.warpAffine(img, transformation_matrix, dsize=target_shape, dst=target_image, borderMode=cv2.BORDER_TRANSPARENT)
         return img
 
-    def random_erode(self, img, probability = 0.25):
+    def _random_erode(self, img, probability = 0.25):
         if random.random() < probability:
-            img = self.erode(img)
+            img = self._erode(img)
         return img
 
-    def erode(self, img):
+    def _erode(self, img):
         kernel = np.ones((3, 3))
         img = cv2.erode(img, kernel)
         return img
 
-    def random_dilate(self, img, probability = 0.25):
+    def _random_dilate(self, img, probability = 0.25):
         if random.random() < probability:
-            img = self.dilate(img)
+            img = self._dilate(img)
         return img
 
-    def dilate(self, img):
+    def _dilate(self, img):
         kernel = np.ones((3, 3))
         img = cv2.dilate(img, kernel)
         return img
@@ -250,13 +250,13 @@ class Preprocessor:
     def _generate_random_odd_number(self):
         return random.randint(1, 3) * 2 + 1
 
-    def random_gaussian_blur(self, img, probability = 0.25):
+    def _random_gaussian_blur(self, img, probability = 0.25):
         if random.random() < probability:
             random_kernel_size = (self._generate_random_odd_number(), self._generate_random_odd_number())
-            img = self.gaussian_blur(img, random_kernel_size)
+            img = self._gaussian_blur(img, random_kernel_size)
         return img
 
-    def gaussian_blur(self, img, kernel_size):
+    def _gaussian_blur(self, img, kernel_size):
         img = cv2.GaussianBlur(img, kernel_size, 0)
         return img
 
