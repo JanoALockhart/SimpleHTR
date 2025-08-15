@@ -1,9 +1,10 @@
 import argparse
-import json
 from typing import Tuple, List
 
 import cv2
 import editdistance
+
+from settings import FilePaths
 from path import Path
 
 from dataloader_iam import DataLoaderIAM, Batch
@@ -13,13 +14,6 @@ from preprocessor import Preprocessor
 import time
 
 from summary_writer import SummaryWriter, EpochSummary
-
-class FilePaths:
-    """Filenames and paths to data."""
-    fn_char_list = '../model/charList.txt'
-    fn_summary = '../model/summary.json'
-    fn_corpus = '../data/corpus.txt'
-
 
 def get_img_height() -> int:
     """Fixed height for NN."""
