@@ -2,12 +2,12 @@ import argparse
 from typing import List
 from path import Path
 
-from settings import FilePaths
+from settings import Settings
 from dataloader_iam import DataLoaderIAM
 from model import Model, DecoderType
 
 def char_list_from_file() -> List[str]:
-    with open(FilePaths.fn_char_list) as f:
+    with open(Settings.CHAR_LIST_FILE_PATH) as f:
         return list(f.read())
 
 def parse_args() -> argparse.Namespace:
@@ -47,10 +47,10 @@ def main():
             char_list = [' '] + char_list
 
         # save characters and words
-        with open(FilePaths.fn_char_list, 'w') as f:
+        with open(Settings.CHAR_LIST_FILE_PATH, 'w') as f:
             f.write(''.join(char_list))
 
-        with open(FilePaths.fn_corpus, 'w') as f:
+        with open(Settings.CORPUS_FILE_PATH, 'w') as f:
             f.write(' '.join(loader.train_words + loader.validation_words))
 
         model = Model(char_list, decoder_type)

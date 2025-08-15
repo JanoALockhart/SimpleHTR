@@ -10,7 +10,7 @@ from path import Path
 import numpy as np
 import tensorflow as tf
 
-from settings import FilePaths
+from settings import Settings
 from dataloader_iam import Batch
 from preprocessor import Preprocessor
 from summary_writer import SummaryWriter, EpochSummary
@@ -327,7 +327,7 @@ class Model:
             early_stopping: int = 25) -> None:
         """Trains NN."""
         epoch = 0  # number of training epochs since start
-        summary_writer = SummaryWriter(FilePaths.fn_summary)
+        summary_writer = SummaryWriter(Settings.SUMMARY_FILE_PATH)
 
         train_loss_in_epoch = []
 

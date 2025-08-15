@@ -1,5 +1,5 @@
-class FilePaths:
+class Settings:
     """Filenames and paths to data."""
-    fn_char_list = '../model/charList.txt'
-    fn_summary = '../model/summary.json'
-    fn_corpus = '../data/corpus.txt'
+    CHAR_LIST_FILE_PATH = '../model/charList.txt'
+    SUMMARY_FILE_PATH = '../model/summary.json'
+    CORPUS_FILE_PATH = '../data/corpus.txt'
