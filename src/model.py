@@ -16,9 +16,6 @@ from preprocessor import Preprocessor
 from summary_writer import SummaryWriter, EpochSummary
 from dataloader_iam import DataLoaderIAM
 
-# Disable eager mode
-tf.compat.v1.disable_eager_execution()
-
 class DecoderType:
     """CTC decoder types."""
     BestPath = 0

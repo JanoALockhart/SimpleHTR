@@ -1,6 +1,7 @@
 import argparse
 from typing import List
 from path import Path
+import tensorflow as tf
 
 from settings import Settings
 from dataloader_iam import DataLoaderIAM
@@ -29,6 +30,8 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     """Main function."""
+    # Disable eager mode
+    tf.compat.v1.disable_eager_execution()
 
     # parse arguments and set CTC decoder
     args = parse_args()
