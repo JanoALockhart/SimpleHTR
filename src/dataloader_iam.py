@@ -36,7 +36,7 @@ class DataLoaderIAM:
         self.batch_size = batch_size
         self.samples = []
 
-        samples, alphabet = self.load_samples(data_dir)
+        self.samples, alphabet = self.load_samples(data_dir)
         self.train_samples, self.validation_samples = self.split_dataset(data_split)
 
         # put words into lists
@@ -48,7 +48,6 @@ class DataLoaderIAM:
 
         # list of all chars in dataset
         self.char_list = sorted(list(alphabet))
-        self.samples = samples
 
     def split_dataset(self, data_split):
         # split into training and validation set: 95% - 5%
@@ -71,7 +70,7 @@ class DataLoaderIAM:
                 
                 ground_truth_text = ' '.join(line_split[8:]) # GT text are columns starting at 9
                 alphabet = alphabet.union(set(list(ground_truth_text)))
-
+        
                 samples.append(Sample(ground_truth_text, image_path))
 
         return samples, alphabet
