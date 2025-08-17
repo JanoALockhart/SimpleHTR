@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
 import pickle
 import random
@@ -9,18 +8,8 @@ import lmdb
 import numpy as np
 from path import Path
 
+from dataset_structure import Batch, Sample
 from preprocessor import Preprocessor
-
-@dataclass
-class Sample:
-    gt_text: str
-    file_path: str
-
-@dataclass
-class Batch:
-    imgs: list
-    gt_texts: list
-    batch_size: int
 
 class AbstractDataset(ABC):
     @abstractmethod

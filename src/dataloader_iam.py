@@ -3,7 +3,8 @@ from typing import List, Tuple
 
 from path import Path
 
-from dataset import AbstractDataset, Dataset, DatasetLoader, Sample
+from dataset import AbstractDataset, Dataset
+from dataset_structure import Sample
 from settings import Settings
 
 class DatasetLoader(ABC):

@@ -4,7 +4,7 @@ from typing import Tuple
 import cv2
 import numpy as np
 
-from dataset import Batch
+from dataset_structure import Batch
 
 def get_img_height() -> int:
     """Fixed height for NN."""
