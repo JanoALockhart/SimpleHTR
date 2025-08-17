@@ -68,7 +68,7 @@ def main():
     # infer text on test image
     elif args.mode == 'infer':
         model = Model(char_list_from_file(), decoder_type, must_restore=True, dump=args.dump)
-        model.infer(model, args.img_file)
+        model.infer(args.img_file)
 
 
 if __name__ == '__main__':
