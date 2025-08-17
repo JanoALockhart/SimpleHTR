@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from typing import Tuple
 
+from preprocessor import Preprocessor
+
 @dataclass
 class Sample:
     gt_text: str
@@ -34,6 +36,10 @@ class AbstractDataset(ABC):
 
     @abstractmethod
     def get_iterator_info(self) -> Tuple[int, int]:
+        pass
+
+    @abstractmethod
+    def map(self, preprocessor: Preprocessor) -> "AbstractDataset":
         pass
 
 class DatasetLoader(ABC):
