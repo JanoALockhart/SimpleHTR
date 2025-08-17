@@ -37,11 +37,7 @@ class DataLoaderIAM:
         self.samples = []
 
         samples, alphabet = self.load_samples(data_dir)
-
-        # split into training and validation set: 95% - 5%
-        split_idx = int(data_split * len(self.samples))
-        self.train_samples = self.samples[:split_idx]
-        self.validation_samples = self.samples[split_idx:]
+        self.train_samples, self.validation_samples = self.split_dataset(data_split)
 
         # put words into lists
         self.train_words = [x.gt_text for x in self.train_samples]
@@ -53,6 +49,13 @@ class DataLoaderIAM:
         # list of all chars in dataset
         self.char_list = sorted(list(alphabet))
         self.samples = samples
+
+    def split_dataset(self, data_split):
+        # split into training and validation set: 95% - 5%
+        split_idx = int(data_split * len(self.samples))
+        train_samples = self.samples[:split_idx]
+        validation_samples = self.samples[split_idx:]
+        return train_samples,validation_samples
 
     def load_samples(self, data_dir):
         ground_truths_file = open(data_dir / 'gt/words.txt')
