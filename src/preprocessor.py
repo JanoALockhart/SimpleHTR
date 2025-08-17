@@ -6,9 +6,19 @@ import numpy as np
 
 from dataset import Batch
 
+def get_img_height() -> int:
+    """Fixed height for NN."""
+    return 32
+
+def get_img_size(line_mode: bool = False) -> Tuple[int, int]:
+    """Height is fixed for NN, width is set according to training mode (single words or text lines)."""
+    if line_mode:
+        return 256, get_img_height()
+    return 128, get_img_height()
+
+
 class Preprocessor:
     def __init__(self,
-                 target_img_size: Tuple[int, int],
                  padding: int = 0,
                  dynamic_width: bool = False,
                  data_augmentation: bool = False,
@@ -18,7 +28,7 @@ class Preprocessor:
         # when padding is on, we need dynamic width enabled
         assert not (padding > 0 and not dynamic_width)
 
-        self.target_img_size = target_img_size
+        self.target_img_size = get_img_size()
         self.padding = padding
         self.dynamic_width = dynamic_width
         self.data_augmentation = data_augmentation

@@ -11,17 +11,6 @@ from model import Model, DecoderType
 def char_list_from_file() -> List[str]:
     with open(Settings.CHAR_LIST_FILE_PATH) as f:
         return list(f.read())
-    
-def get_img_height(self) -> int:
-    """Fixed height for NN."""
-    return 32
-
-def get_img_size(self, line_mode: bool = False) -> Tuple[int, int]:
-    """Height is fixed for NN, width is set according to training mode (single words or text lines)."""
-    if line_mode:
-        return 256, self.get_img_height()
-    return 128, self.get_img_height()
-
 
 def parse_args() -> argparse.Namespace:
     """Parses arguments from the command line."""
@@ -55,9 +44,9 @@ def main():
     loader = DataLoaderIAM(args.data_dir, args.batch_size, fast=args.fast)
     train_set, validation_set, test_set = loader.get_datasets()
 
-    train_preprocessor = Preprocessor(get_img_size(args.line_mode), data_augmentation=True, line_mode=args.line_mode)
+    train_preprocessor = Preprocessor(data_augmentation=True, line_mode=args.line_mode)
     train_set.map(train_preprocessor)
-    validation_preprocessor = Preprocessor(get_img_size(args.line_mode), line_mode=args.line_mode)
+    validation_preprocessor = Preprocessor(line_mode=args.line_mode)
     validation_set.map(validation_preprocessor)
 
     # train the model
