@@ -60,22 +60,19 @@ class DataLoaderIAM:
         alphabet = set()
         
         for line in ground_truths_file:
-            # ignore empty and comment lines
             line = line.strip()
             line_split = line.split(' ')
-            assert len(line_split) >= 9
 
             if self._ignore_line(line, line_split):
                 continue
 
             image_path = self.parse_image_path(data_dir, line_split)
-
-            # GT text are columns starting at 9
-            ground_truth_text = ' '.join(line_split[8:])
+            
+            ground_truth_text = ' '.join(line_split[8:]) # GT text are columns starting at 9
             alphabet = alphabet.union(set(list(ground_truth_text)))
 
-            # put sample into list
             samples.append(Sample(ground_truth_text, image_path))
+
         return samples, alphabet
 
     def _ignore_line(self, line, line_split):
