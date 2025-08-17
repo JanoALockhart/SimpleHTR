@@ -28,7 +28,7 @@ class DataLoaderIAM(DatasetLoader):
 
         self.samples = self.load_samples(data_dir)
         self.char_list = self._build_char_list()
-        self.train_dataset, self.validation_dataset, self.test_dataset = self.split_dataset(
+        self.train_set, self.validation_set, self.test_set = self.split_dataset(
             train_split, 
             validation_split, 
             batch_size, 
@@ -38,7 +38,7 @@ class DataLoaderIAM(DatasetLoader):
         self.corpus = [x.gt_text for x in self.samples]
     
     def get_datasets(self):
-        return self.train_dataset, self.validation_dataset, self.test_dataset
+        return self.train_set, self.validation_set, self.test_set
 
     def _build_char_list(self):
         alphabet = set()
@@ -54,15 +54,15 @@ class DataLoaderIAM(DatasetLoader):
         validation_size = int(validation_split * dataset_size)
 
         train_samples = self.samples[0:train_size]
-        train_dataset = Dataset(train_samples, batch_size, data_dir, drop_remainder=True, shuffle=True, fast=fast)
+        train_set = Dataset(train_samples, batch_size, data_dir, drop_remainder=True, shuffle=True, fast=fast)
 
         validation_samples = self.samples[train_size:train_size + validation_size]
-        validation_dataset = Dataset(validation_samples, batch_size, data_dir)
+        validation_set = Dataset(validation_samples, batch_size, data_dir)
 
         test_samples = self.samples[train_size + validation_size:]
-        test_dataset = Dataset(test_samples, batch_size, data_dir)
+        test_set = Dataset(test_samples, batch_size, data_dir)
 
-        return train_dataset, validation_dataset, test_dataset
+        return train_set, validation_set, test_set
 
     def load_samples(self, data_dir) -> List[Sample]:
         ground_truths_file = open(data_dir / 'gt/words.txt')
