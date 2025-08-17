@@ -27,18 +27,19 @@ class DataLoaderIAM:
 
         self.samples = self.load_samples(data_dir)
 
-        alphabet = set()
-        for example in self.samples:
-            unique_letters = set(list(example.gt_text))
-            alphabet.union(unique_letters)
+        self.char_list = self._build_char_list()
 
         self.train_samples, self.validation_samples = self.split_dataset(data_split, batch_size, data_dir, fast)
 
         # put words into lists
         self.corpus = [x.gt_text for x in self.samples]
 
-        # list of all chars in dataset
-        self.char_list = sorted(list(alphabet))
+    def _build_char_list(self):
+        alphabet = set()
+        for example in self.samples:
+            unique_letters = set(list(example.gt_text))
+            alphabet.union(unique_letters)
+        return sorted(list(alphabet))   
 
     def split_dataset(self, data_split, batch_size, data_dir, fast) -> Tuple[AbstractDataset, AbstractDataset]:
         # split into training and validation set: 95% - 5%
