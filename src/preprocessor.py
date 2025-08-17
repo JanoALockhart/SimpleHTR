@@ -4,8 +4,7 @@ from typing import Tuple
 import cv2
 import numpy as np
 
-from dataloader_iam import Batch
-
+from dataset import Batch
 
 class Preprocessor:
     def __init__(self,

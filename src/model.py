@@ -10,8 +10,8 @@ from path import Path
 import numpy as np
 import tensorflow as tf
 
+from dataset import Batch
 from settings import Settings
-from dataloader_iam import Batch
 from preprocessor import Preprocessor
 from summary_writer import SummaryWriter, EpochSummary
 from dataloader_iam import DataLoaderIAM
