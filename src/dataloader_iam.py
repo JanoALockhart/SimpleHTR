@@ -30,7 +30,7 @@ class DataLoaderIAM:
         self.samples = []
 
         self.samples, alphabet = self.load_samples(data_dir)
-        self.train_samples, self.validation_samples = self.split_dataset(data_split)
+        self.train_samples, self.validation_samples = self.split_dataset(data_split, batch_size, data_dir, fast)
 
         # put words into lists
         self.train_words = [x.gt_text for x in self.train_samples]
@@ -39,12 +39,17 @@ class DataLoaderIAM:
         # list of all chars in dataset
         self.char_list = sorted(list(alphabet))
 
-    def split_dataset(self, data_split):
+    def split_dataset(self, data_split, batch_size, data_dir, fast) -> Tuple[AbstractDataset, AbstractDataset]:
         # split into training and validation set: 95% - 5%
         split_idx = int(data_split * len(self.samples))
+
         train_samples = self.samples[:split_idx]
+        train_dataset = Dataset(train_samples, batch_size, data_dir, drop_remainder=True, shuffle=True, fast=fast)
+
         validation_samples = self.samples[split_idx:]
-        return train_samples,validation_samples
+        validation_dataset = Dataset(validation_samples, batch_size, data_dir)
+
+        return train_dataset, validation_dataset
 
     def load_samples(self, data_dir):
         ground_truths_file = open(data_dir / 'gt/words.txt')
@@ -87,8 +92,7 @@ class DataLoaderIAM:
 class Dataset(AbstractDataset):
     def __init__(self, 
                  samples:List[Sample], 
-                 batch_size:int, 
-                 preprocessor:Preprocessor,
+                 batch_size:int,
                  data_dir: Path,
                  drop_remainder:bool = False, 
                  shuffle:bool = False,
@@ -96,7 +100,6 @@ class Dataset(AbstractDataset):
         self.samples = samples
         self.batch_size = batch_size
         self.drop_remainder = drop_remainder
-        self.preprocessor = preprocessor
         self.shuffle = shuffle
         self.fast = fast
         self.curr_idx = 0
