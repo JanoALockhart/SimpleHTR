@@ -65,10 +65,7 @@ class DataLoaderIAM:
             line_split = line.split(' ')
             assert len(line_split) >= 9
 
-            if not line or line[0] == '#' or line_split[0] in bad_samples_reference:
-                if line_split[0] in bad_samples_reference:
-                    print('Ignoring known broken image:', image_path)
-    
+            if self._ignore_line(bad_samples_reference, line, line_split):
                 continue
 
             image_path = self.parse_image_path(data_dir, line_split)
@@ -79,8 +76,17 @@ class DataLoaderIAM:
 
             # put sample into list
             samples.append(Sample(ground_truth_text, image_path))
-        return samples,alphabet
+        return samples, alphabet
 
+    def _ignore_line(self, bad_samples_reference, line, line_split):
+        first_char = line[0]
+        file_name = line_split[0]
+        ignore_line = not line or first_char == '#' or file_name in bad_samples_reference
+        if file_name in bad_samples_reference:
+            print('Ignoring known broken image:', file_name)
+
+        return ignore_line
+    
     def parse_image_path(self, data_dir, line_split):
         # filename: part1-part2-part3 --> part1/part1-part2/part1-part2-part3.png
         file_name_split = line_split[0].split('-')
