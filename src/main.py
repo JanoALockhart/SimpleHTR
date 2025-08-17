@@ -3,6 +3,7 @@ from typing import List
 from path import Path
 import tensorflow as tf
 
+from preprocessor import Preprocessor
 from settings import Settings
 from dataloader_iam import DataLoaderIAM
 from model import Model, DecoderType
@@ -10,6 +11,17 @@ from model import Model, DecoderType
 def char_list_from_file() -> List[str]:
     with open(Settings.CHAR_LIST_FILE_PATH) as f:
         return list(f.read())
+    
+def get_img_height(self) -> int:
+    """Fixed height for NN."""
+    return 32
+
+def get_img_size(self, line_mode: bool = False) -> Tuple[int, int]:
+    """Height is fixed for NN, width is set according to training mode (single words or text lines)."""
+    if line_mode:
+        return 256, self.get_img_height()
+    return 128, self.get_img_height()
+
 
 def parse_args() -> argparse.Namespace:
     """Parses arguments from the command line."""
@@ -44,6 +56,10 @@ def main():
     if args.mode == 'train':
         loader = DataLoaderIAM(args.data_dir, args.batch_size, fast=args.fast)
         train_set, validation_set, test_set = loader.get_datasets()
+
+        train_preprocessor = Preprocessor(get_img_size(args.line_mode), data_augmentation=True, line_mode=args.line_mode)
+        train_set.map(train_preprocessor)
+
         model = Model(loader.char_list, decoder_type)
         model.train(train_set, validation_set, line_mode=args.line_mode, early_stopping=args.early_stopping)
 
@@ -51,6 +67,10 @@ def main():
     elif args.mode == 'validate':
         loader = DataLoaderIAM(args.data_dir, args.batch_size, fast=args.fast)
         _, validation_set, _ = loader.get_datasets()
+
+        validation_preprocessor = Preprocessor(get_img_size(args.line_mode), line_mode=args.line_mode)
+        validation_set.map(validation_preprocessor)
+
         model = Model(char_list_from_file(), decoder_type, must_restore=True)
         model.validate(validation_set, args.line_mode)
 

@@ -307,16 +307,6 @@ class Model:
         self.snap_ID += 1
         self.saver.save(self.sess, '../model/snapshot', global_step=self.snap_ID)
 
-    def get_img_height(self) -> int:
-        """Fixed height for NN."""
-        return 32
-
-    def get_img_size(self, line_mode: bool = False) -> Tuple[int, int]:
-        """Height is fixed for NN, width is set according to training mode (single words or text lines)."""
-        if line_mode:
-            return 256, self.get_img_height()
-        return 128, self.get_img_height()
-
     def train(self,
             train_set: Dataset,
             validation_set: Dataset,
@@ -328,8 +318,6 @@ class Model:
 
         train_loss_in_epoch = []
 
-        preprocessor = Preprocessor(self.get_img_size(line_mode), data_augmentation=True, line_mode=line_mode)
-        train_set.map(preprocessor)
         best_char_error_rate = float('inf')  # best validation character error rate
         no_improvement_since = 0  # number of epochs no improvement of character error rate occurred
         # stop training after this number of epochs without improvement
@@ -386,8 +374,6 @@ class Model:
         """Validates NN."""
         print('Validate NN')
         validation_set.reset_iterator()
-        preprocessor = Preprocessor(self.get_img_size(line_mode), line_mode=line_mode)
-        validation_set.map(preprocessor)
         num_char_err = 0
         num_char_total = 0
         num_word_ok = 0
