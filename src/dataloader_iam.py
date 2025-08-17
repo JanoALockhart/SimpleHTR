@@ -9,6 +9,7 @@ from path import Path
 
 from dataset import AbstractDataset, Batch, DatasetLoader, Sample
 from preprocessor import Preprocessor
+from settings import Settings
 
 class DataLoaderIAM(DatasetLoader):
     """
@@ -21,7 +22,8 @@ class DataLoaderIAM(DatasetLoader):
                  batch_size: int,
                  train_split: float = 0.95,
                  validation_split: float = 0.04,
-                 fast: bool = True) -> None:
+                 fast: bool = True,
+                 line_mode: bool = False) -> None:
         """Loader for dataset."""
 
         assert data_dir.exists()
@@ -36,6 +38,18 @@ class DataLoaderIAM(DatasetLoader):
             fast
         )
         self.corpus = [x.gt_text for x in self.samples]
+
+        # when in line mode, take care to have a whitespace in the char list
+        if line_mode and ' ' not in self.char_list:
+            self.char_list = [' '] + self.char_list
+
+        # save characters and words
+        with open(Settings.CHAR_LIST_FILE_PATH, 'w') as f:
+            f.write(''.join(self.char_list))
+
+        with open(Settings.CORPUS_FILE_PATH, 'w') as f:
+            f.write(' '.join(self.corpus))
+
     
     def get_datasets(self):
         return self.train_set, self.validation_set, self.test_set

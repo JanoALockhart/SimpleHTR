@@ -43,20 +43,7 @@ def main():
     # train the model
     if args.mode == 'train':
         loader = DataLoaderIAM(args.data_dir, args.batch_size, fast=args.fast)
-
-        # when in line mode, take care to have a whitespace in the char list
-        char_list = loader.char_list
-        if args.line_mode and ' ' not in char_list:
-            char_list = [' '] + char_list
-
-        # save characters and words
-        with open(Settings.CHAR_LIST_FILE_PATH, 'w') as f:
-            f.write(''.join(char_list))
-
-        with open(Settings.CORPUS_FILE_PATH, 'w') as f:
-            f.write(' '.join(loader.corpus))
-
-        model = Model(char_list, decoder_type)
+        model = Model(loader.char_list, decoder_type)
         model.train(loader, line_mode=args.line_mode, early_stopping=args.early_stopping)
 
     # evaluate it on the validation set
