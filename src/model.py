@@ -139,8 +139,8 @@ class Model:
         elif self.decoder_type == DecoderType.WordBeamSearch:
             # prepare information about language (dictionary, characters in dataset, characters forming words)
             chars = ''.join(self.char_list)
-            word_chars = open('../model/wordCharList.txt').read().splitlines()[0]
-            corpus = open('../data/corpus.txt').read()
+            word_chars = open(Settings.WORD_CHAR_LIST_FILE_PATH).read().splitlines()[0]
+            corpus = open(Settings.CORPUS_FILE_PATH).read()
 
             # decode using the "Words" mode of word beam search
             from word_beam_search import WordBeamSearch
@@ -158,12 +158,12 @@ class Model:
         sess = tf.compat.v1.Session()  # TF session
 
         saver = tf.compat.v1.train.Saver(max_to_keep=1)  # saver saves model to file
-        model_dir = '../model/'
-        latest_snapshot = tf.train.latest_checkpoint(model_dir)  # is there a saved model?
+        
+        latest_snapshot = tf.train.latest_checkpoint(Settings.MODEL_DIR)  # is there a saved model?
 
         # if model must be restored (for inference), there must be a snapshot
         if self.must_restore and not latest_snapshot:
-            raise Exception('No saved model found in: ' + model_dir)
+            raise Exception('No saved model found in: ' + Settings.MODEL_DIR)
 
         # load saved model if available
         if latest_snapshot:
@@ -234,9 +234,8 @@ class Model:
     @staticmethod
     def dump_nn_output(rnn_output: np.ndarray) -> None:
         """Dump the output of the NN to CSV file(s)."""
-        dump_dir = '../dump/'
-        if not os.path.isdir(dump_dir):
-            os.mkdir(dump_dir)
+        if not os.path.isdir(Settings.DUMP_DIR):
+            os.mkdir(Settings.DUMP_DIR)
 
         # iterate over all batch elements and create a CSV file for each one
         max_t, max_b, max_c = rnn_output.shape
@@ -244,7 +243,7 @@ class Model:
             csv = ''
             for t in range(max_t):
                 csv += ';'.join([str(rnn_output[t, b, c]) for c in range(max_c)]) + ';\n'
-            fn = dump_dir + 'rnnOutput_' + str(b) + '.csv'
+            fn = Settings.DUMP_DIR + 'rnnOutput_' + str(b) + '.csv'
             print('Write dump of NN to file: ' + fn)
             with open(fn, 'w') as f:
                 f.write(csv)
