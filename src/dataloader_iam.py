@@ -125,10 +125,14 @@ class Dataset(AbstractDataset):
         self.shuffle = shuffle
         self.fast = fast
         self.curr_idx = 0
+        self.preprocessor: Preprocessor = None
 
         if fast:
             self.env = lmdb.open(str(data_dir / 'lmdb'), readonly=True)
 
+    def map(self, preprocessor: Preprocessor) -> AbstractDataset:
+        self.preprocessor = preprocessor
+        return self
 
     def has_next(self) -> bool:
         """Is there a next element?"""
