@@ -1,13 +1,14 @@
 import pickle
 import random
-from typing import Tuple
+from typing import List, Tuple
 
 import cv2
 import lmdb
 import numpy as np
 from path import Path
 
-from dataset import Batch, Sample
+from dataset import AbstractDataset, Batch, Sample
+from preprocessor import Preprocessor
 
 class DataLoaderIAM:
     """
@@ -142,3 +143,12 @@ class DataLoaderIAM:
 
         self.curr_idx += self.batch_size
         return Batch(imgs, gt_texts, len(imgs))
+    
+class Dataset(AbstractDataset):
+    def __init__(self, samples:List[Sample], batch_size:int, drop_remainder:bool, preprocessor:Preprocessor):
+        self.samples = samples
+        self.batch_size = batch_size
+        self.drop_remainder = drop_remainder
+        self.preprocessor = preprocessor
+
+    

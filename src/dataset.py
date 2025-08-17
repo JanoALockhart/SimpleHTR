@@ -23,7 +23,7 @@ class ImageLoader(ABC):
     def get_img(self):
         pass
 
-class Dataset(ABC):
+class AbstractDataset(ABC):
     @abstractmethod
     def has_next(self) -> bool:
         pass
@@ -38,7 +38,7 @@ class Dataset(ABC):
 
 class DatasetLoader(ABC):
     @abstractmethod
-    def get_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
+    def get_datasets(self) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
         """Returns the training, validation and test datasets"""
         pass
  
