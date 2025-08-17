@@ -19,7 +19,8 @@ class DataLoaderIAM:
     def __init__(self,
                  data_dir: Path,
                  batch_size: int,
-                 data_split: float = 0.95,
+                 train_split: float = 0.95,
+                 validation_split: float = 0.04,
                  fast: bool = True) -> None:
         """Loader for dataset."""
 
@@ -29,7 +30,7 @@ class DataLoaderIAM:
 
         self.char_list = self._build_char_list()
 
-        self.train_samples, self.validation_samples = self.split_dataset(data_split, batch_size, data_dir, fast)
+        self.train_samples, self.validation_samples = self.split_dataset(train_split, validation_split, batch_size, data_dir, fast)
 
         # put words into lists
         self.corpus = [x.gt_text for x in self.samples]
@@ -41,17 +42,22 @@ class DataLoaderIAM:
             alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
-    def split_dataset(self, data_split, batch_size, data_dir, fast) -> Tuple[AbstractDataset, AbstractDataset]:
-        # split into training and validation set: 95% - 5%
-        split_idx = int(data_split * len(self.samples))
+    def split_dataset(self, train_split, validation_split, batch_size, data_dir, fast) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
+        # split into training and validation set: 95% - 4% - 1%
+        dataset_size = len(self.samples)
+        train_size = int(train_split * dataset_size)
+        validation_size = int(validation_split * dataset_size)
 
-        train_samples = self.samples[:split_idx]
+        train_samples = self.samples[0:train_size]
         train_dataset = Dataset(train_samples, batch_size, data_dir, drop_remainder=True, shuffle=True, fast=fast)
 
-        validation_samples = self.samples[split_idx:]
+        validation_samples = self.samples[train_size:train_size + validation_size]
         validation_dataset = Dataset(validation_samples, batch_size, data_dir)
 
-        return train_dataset, validation_dataset
+        test_samples = self.samples[train_size + validation_size:]
+        test_dataset = Dataset(test_samples, batch_size, data_dir)
+
+        return train_dataset, validation_dataset, test_dataset
 
     def load_samples(self, data_dir) -> List[Sample]:
         ground_truths_file = open(data_dir / 'gt/words.txt')
