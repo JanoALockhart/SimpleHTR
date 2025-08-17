@@ -49,11 +49,7 @@ class DataLoaderIAM:
             assert len(line_split) >= 9
 
             # filename: part1-part2-part3 --> part1/part1-part2/part1-part2-part3.png
-            file_name_split = line_split[0].split('-')
-            fist_subdir_name = file_name_split[0]
-            second_subdir_name = f'{file_name_split[0]}-{file_name_split[1]}'
-            file_name = line_split[0] + '.png'
-            file_path = data_dir / 'img' / fist_subdir_name / second_subdir_name / file_name
+            file_path = self.parse_image_path(data_dir, line_split)
 
             if line_split[0] in bad_samples_reference:
                 print('Ignoring known broken image:', file_path)
@@ -80,6 +76,14 @@ class DataLoaderIAM:
 
         # list of all chars in dataset
         self.char_list = sorted(list(chars))
+
+    def parse_image_path(self, data_dir, line_split):
+        file_name_split = line_split[0].split('-')
+        fist_subdir_name = file_name_split[0]
+        second_subdir_name = f'{file_name_split[0]}-{file_name_split[1]}'
+        file_name = line_split[0] + '.png'
+        file_path = data_dir / 'img' / fist_subdir_name / second_subdir_name / file_name
+        return file_path
 
     def train_set(self) -> None:
         """Switch to randomly chosen subset of training set."""
