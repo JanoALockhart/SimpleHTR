@@ -43,14 +43,16 @@ def main():
     # train the model
     if args.mode == 'train':
         loader = DataLoaderIAM(args.data_dir, args.batch_size, fast=args.fast)
+        train_set, validation_set, test_set = loader.get_datasets()
         model = Model(loader.char_list, decoder_type)
-        model.train(loader, line_mode=args.line_mode, early_stopping=args.early_stopping)
+        model.train(train_set, validation_set, line_mode=args.line_mode, early_stopping=args.early_stopping)
 
     # evaluate it on the validation set
     elif args.mode == 'validate':
         loader = DataLoaderIAM(args.data_dir, args.batch_size, fast=args.fast)
+        _, validation_set, _ = loader.get_datasets()
         model = Model(char_list_from_file(), decoder_type, must_restore=True)
-        model.validate(loader, args.line_mode)
+        model.validate(validation_set, args.line_mode)
 
     # infer text on test image
     elif args.mode == 'infer':
