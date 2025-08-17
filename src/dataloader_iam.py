@@ -29,7 +29,6 @@ class DataLoaderIAM:
         if fast:
             self.env = lmdb.open(str(data_dir / 'lmdb'), readonly=True)
 
-        self.data_augmentation = False
         self.curr_idx = 0
         self.batch_size = batch_size
         self.samples = []
@@ -94,7 +93,6 @@ class DataLoaderIAM:
 
     def train_set(self) -> None:
         """Switch to randomly chosen subset of training set."""
-        self.data_augmentation = True
         self.curr_idx = 0
         random.shuffle(self.train_samples)
         self.samples = self.train_samples
@@ -102,7 +100,6 @@ class DataLoaderIAM:
 
     def validation_set(self) -> None:
         """Switch to validation set."""
-        self.data_augmentation = False
         self.curr_idx = 0
         self.samples = self.validation_samples
         self.curr_set = 'val'
