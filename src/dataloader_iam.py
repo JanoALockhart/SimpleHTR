@@ -27,9 +27,15 @@ class DataLoaderIAM:
 
         self.fast = fast
         self.batch_size = batch_size
-        self.samples = []
+        self.samples:List[Sample] = []
 
-        self.samples, alphabet = self.load_samples(data_dir)
+        self.samples = self.load_samples(data_dir)
+
+        alphabet = set()
+        for example in self.samples:
+            unique_letters = set(list(example.gt_text))
+            alphabet.union(unique_letters)
+
         self.train_samples, self.validation_samples = self.split_dataset(data_split, batch_size, data_dir, fast)
 
         # put words into lists
@@ -53,7 +59,6 @@ class DataLoaderIAM:
     def load_samples(self, data_dir):
         ground_truths_file = open(data_dir / 'gt/words.txt')
         samples = []
-        alphabet = set()
         
         for line in ground_truths_file:
             line = line.strip()
@@ -61,13 +66,10 @@ class DataLoaderIAM:
 
             if not self._ignore_line(line, line_split):
                 image_path = self.parse_image_path(data_dir, line_split)
-                
                 ground_truth_text = ' '.join(line_split[8:]) # GT text are columns starting at 9
-                alphabet = alphabet.union(set(list(ground_truth_text)))
-        
                 samples.append(Sample(ground_truth_text, image_path))
 
-        return samples, alphabet
+        return samples
 
     def _ignore_line(self, line, line_split):
         bad_samples_reference = ['a01-117-05-02', 'r06-022-03-05']  # known broken images in IAM dataset
