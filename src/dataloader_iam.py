@@ -27,12 +27,14 @@ class DataLoaderIAM:
         assert data_dir.exists()
 
         self.samples = self.load_samples(data_dir)
-
         self.char_list = self._build_char_list()
-
-        self.train_samples, self.validation_samples = self.split_dataset(train_split, validation_split, batch_size, data_dir, fast)
-
-        # put words into lists
+        self.train_dataset, self.validation_dataset, self.test_dataset = self.split_dataset(
+            train_split, 
+            validation_split, 
+            batch_size, 
+            data_dir, 
+            fast
+        )
         self.corpus = [x.gt_text for x in self.samples]
 
     def _build_char_list(self):
