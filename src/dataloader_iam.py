@@ -63,15 +63,13 @@ class DataLoaderIAM:
             line = line.strip()
             line_split = line.split(' ')
 
-            if self._ignore_line(line, line_split):
-                continue
+            if not self._ignore_line(line, line_split):
+                image_path = self.parse_image_path(data_dir, line_split)
+                
+                ground_truth_text = ' '.join(line_split[8:]) # GT text are columns starting at 9
+                alphabet = alphabet.union(set(list(ground_truth_text)))
 
-            image_path = self.parse_image_path(data_dir, line_split)
-            
-            ground_truth_text = ' '.join(line_split[8:]) # GT text are columns starting at 9
-            alphabet = alphabet.union(set(list(ground_truth_text)))
-
-            samples.append(Sample(ground_truth_text, image_path))
+                samples.append(Sample(ground_truth_text, image_path))
 
         return samples, alphabet
 
