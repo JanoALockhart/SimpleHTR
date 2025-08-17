@@ -25,10 +25,6 @@ class DataLoaderIAM:
 
         assert data_dir.exists()
 
-        self.fast = fast
-        self.batch_size = batch_size
-        self.samples:List[Sample] = []
-
         self.samples = self.load_samples(data_dir)
 
         alphabet = set()
@@ -56,7 +52,7 @@ class DataLoaderIAM:
 
         return train_dataset, validation_dataset
 
-    def load_samples(self, data_dir):
+    def load_samples(self, data_dir) -> List[Sample]:
         ground_truths_file = open(data_dir / 'gt/words.txt')
         samples = []
         
