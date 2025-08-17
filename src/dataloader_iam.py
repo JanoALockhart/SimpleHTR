@@ -89,22 +89,7 @@ class DataLoaderIAM:
         second_subdir_name = f'{file_name_split[0]}-{file_name_split[1]}'
         file_name = line_split[0] + '.png'
         file_path = data_dir / 'img' / fist_subdir_name / second_subdir_name / file_name
-        return file_path
-
-    def train_set(self) -> None:
-        """Switch to randomly chosen subset of training set."""
-        self.curr_idx = 0
-        random.shuffle(self.train_samples)
-        self.samples = self.train_samples
-        self.curr_set = 'train'
-
-    def validation_set(self) -> None:
-        """Switch to validation set."""
-        self.curr_idx = 0
-        self.samples = self.validation_samples
-        self.curr_set = 'val'    
-
-    
+        return file_path   
     
 class Dataset(AbstractDataset):
     def __init__(self, samples:List[Sample], batch_size:int, preprocessor:Preprocessor, drop_remainder:bool = False , shuffle:bool = False):
@@ -151,3 +136,8 @@ class Dataset(AbstractDataset):
             img = cv2.imread(self.samples[i].file_path, cv2.IMREAD_GRAYSCALE)
 
         return img
+    
+    def reset_iterator(self):
+        if self.shuffle:
+            random.shuffle(self.samples)
+        self.curr_idx = 0
