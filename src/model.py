@@ -310,7 +310,6 @@ class Model:
     def train(self,
             train_set: Dataset,
             validation_set: Dataset,
-            line_mode: bool,
             early_stopping: int = 25) -> None:
         """Trains NN."""
         epoch = 0  # number of training epochs since start
@@ -339,7 +338,7 @@ class Model:
 
             end_time = time.time()
             # validate
-            char_error_rate, word_accuracy = self.validate(validation_set, line_mode)
+            char_error_rate, word_accuracy = self.validate(validation_set)
 
             # write summary
             epoch_summary = EpochSummary(
@@ -370,7 +369,7 @@ class Model:
                 break
 
 
-    def validate(self, validation_set: Dataset, line_mode: bool) -> Tuple[float, float]:
+    def validate(self, validation_set: Dataset) -> Tuple[float, float]:
         """Validates NN."""
         print('Validate NN')
         validation_set.reset_iterator()
