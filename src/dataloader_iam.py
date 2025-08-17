@@ -38,7 +38,6 @@ class DataLoaderIAM(DatasetLoader):
             fast
         )
         self.corpus = [x.gt_text for x in self.samples]
-
         # when in line mode, take care to have a whitespace in the char list
         if line_mode and ' ' not in self.char_list:
             self.char_list = [' '] + self.char_list
@@ -58,7 +57,7 @@ class DataLoaderIAM(DatasetLoader):
         alphabet = set()
         for example in self.samples:
             unique_letters = set(list(example.gt_text))
-            alphabet.union(unique_letters)
+            alphabet = alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
     def split_dataset(self, train_split, validation_split, batch_size, data_dir, fast) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
