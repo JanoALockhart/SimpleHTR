@@ -118,10 +118,4 @@ class Dataset(AbstractDataset):
             random.shuffle(self.samples)
         self.curr_idx = 0
 
-class DatasetLoader(ABC):
-    @abstractmethod
-    def get_datasets(self) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
-        """Returns the training, validation and test datasets"""
-        pass
- 
         

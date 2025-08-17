@@ -1,14 +1,16 @@
-import pickle
-import random
+from abc import ABC, abstractmethod
 from typing import List, Tuple
 
-import cv2
-import lmdb
-import numpy as np
 from path import Path
 
 from dataset import AbstractDataset, Dataset, DatasetLoader, Sample
 from settings import Settings
+
+class DatasetLoader(ABC):
+    @abstractmethod
+    def get_datasets(self) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
+        """Returns the training, validation and test datasets"""
+        pass
 
 class DataLoaderIAM(DatasetLoader):
     """
