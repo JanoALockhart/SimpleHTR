@@ -102,23 +102,44 @@ class DataLoaderIAM:
         """Switch to validation set."""
         self.curr_idx = 0
         self.samples = self.validation_samples
-        self.curr_set = 'val'
+        self.curr_set = 'val'    
 
+    
+    
+class Dataset(AbstractDataset):
+    def __init__(self, samples:List[Sample], batch_size:int, preprocessor:Preprocessor, drop_remainder:bool = False , shuffle:bool = False):
+        self.samples = samples
+        self.batch_size = batch_size
+        self.drop_remainder = drop_remainder
+        self.preprocessor = preprocessor
+        self.shuffle = shuffle
+        self.curr_idx = 0
+
+    def has_next(self) -> bool:
+        """Is there a next element?"""
+        if self.drop_remainder:
+            return self.curr_idx + self.batch_size <= len(self.samples)  # train set: only full-sized batches
+        else:
+            return self.curr_idx < len(self.samples)  # val set: allow last batch to be smaller
+    
     def get_iterator_info(self) -> Tuple[int, int]:
         """Current batch index and overall number of batches."""
-        if self.curr_set == 'train':
+        if self.drop_remainder:
             num_batches = int(np.floor(len(self.samples) / self.batch_size))  # train set: only full-sized batches
         else:
             num_batches = int(np.ceil(len(self.samples) / self.batch_size))  # val set: allow last batch to be smaller
         curr_batch = self.curr_idx // self.batch_size + 1
         return curr_batch, num_batches
 
-    def has_next(self) -> bool:
-        """Is there a next element?"""
-        if self.curr_set == 'train':
-            return self.curr_idx + self.batch_size <= len(self.samples)  # train set: only full-sized batches
-        else:
-            return self.curr_idx < len(self.samples)  # val set: allow last batch to be smaller
+    def get_next(self) -> Batch:
+        """Get next element."""
+        batch_range = range(self.curr_idx, min(self.curr_idx + self.batch_size, len(self.samples)))
+
+        imgs = [self._get_img(i) for i in batch_range]
+        gt_texts = [self.samples[i].gt_text for i in batch_range]
+
+        self.curr_idx += self.batch_size
+        return Batch(imgs, gt_texts, len(imgs))
 
     def _get_img(self, i: int) -> np.ndarray:
         if self.fast:
@@ -130,22 +151,3 @@ class DataLoaderIAM:
             img = cv2.imread(self.samples[i].file_path, cv2.IMREAD_GRAYSCALE)
 
         return img
-
-    def get_next(self) -> Batch:
-        """Get next element."""
-        batch_range = range(self.curr_idx, min(self.curr_idx + self.batch_size, len(self.samples)))
-
-        imgs = [self._get_img(i) for i in batch_range]
-        gt_texts = [self.samples[i].gt_text for i in batch_range]
-
-        self.curr_idx += self.batch_size
-        return Batch(imgs, gt_texts, len(imgs))
-    
-class Dataset(AbstractDataset):
-    def __init__(self, samples:List[Sample], batch_size:int, drop_remainder:bool, preprocessor:Preprocessor):
-        self.samples = samples
-        self.batch_size = batch_size
-        self.drop_remainder = drop_remainder
-        self.preprocessor = preprocessor
-
-    
