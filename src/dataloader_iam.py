@@ -26,8 +26,6 @@ class DataLoaderIAM:
         assert data_dir.exists()
 
         self.fast = fast
-        
-        self.curr_idx = 0
         self.batch_size = batch_size
         self.samples = []
 
