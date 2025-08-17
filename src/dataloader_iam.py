@@ -158,7 +158,11 @@ class Dataset(AbstractDataset):
         gt_texts = [self.samples[i].gt_text for i in batch_range]
 
         self.curr_idx += self.batch_size
-        return Batch(imgs, gt_texts, len(imgs))
+        batch = Batch(imgs, gt_texts, len(imgs))
+        if Preprocessor is not None:
+            self.preprocessor.process_batch(batch)
+            
+        return batch
 
     def _get_img(self, i: int) -> np.ndarray:
         if self.fast:
