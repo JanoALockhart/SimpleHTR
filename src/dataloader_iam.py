@@ -58,14 +58,14 @@ class DataLoaderIAM:
         ground_truths_file = open(data_dir / 'gt/words.txt')
         samples = []
         alphabet = set()
-        bad_samples_reference = ['a01-117-05-02', 'r06-022-03-05']  # known broken images in IAM dataset
+        
         for line in ground_truths_file:
             # ignore empty and comment lines
             line = line.strip()
             line_split = line.split(' ')
             assert len(line_split) >= 9
 
-            if self._ignore_line(bad_samples_reference, line, line_split):
+            if self._ignore_line(line, line_split):
                 continue
 
             image_path = self.parse_image_path(data_dir, line_split)
@@ -78,7 +78,8 @@ class DataLoaderIAM:
             samples.append(Sample(ground_truth_text, image_path))
         return samples, alphabet
 
-    def _ignore_line(self, bad_samples_reference, line, line_split):
+    def _ignore_line(self, line, line_split):
+        bad_samples_reference = ['a01-117-05-02', 'r06-022-03-05']  # known broken images in IAM dataset
         first_char = line[0]
         file_name = line_split[0]
         ignore_line = not line or first_char == '#' or file_name in bad_samples_reference
