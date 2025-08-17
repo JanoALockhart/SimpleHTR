@@ -26,9 +26,7 @@ class DataLoaderIAM:
         assert data_dir.exists()
 
         self.fast = fast
-        if fast:
-            self.env = lmdb.open(str(data_dir / 'lmdb'), readonly=True)
-
+        
         self.curr_idx = 0
         self.batch_size = batch_size
         self.samples = []
@@ -39,9 +37,6 @@ class DataLoaderIAM:
         # put words into lists
         self.train_words = [x.gt_text for x in self.train_samples]
         self.validation_words = [x.gt_text for x in self.validation_samples]
-
-        # start with train set
-        self.train_set()
 
         # list of all chars in dataset
         self.char_list = sorted(list(alphabet))
@@ -92,13 +87,25 @@ class DataLoaderIAM:
         return file_path   
     
 class Dataset(AbstractDataset):
-    def __init__(self, samples:List[Sample], batch_size:int, preprocessor:Preprocessor, drop_remainder:bool = False , shuffle:bool = False):
+    def __init__(self, 
+                 samples:List[Sample], 
+                 batch_size:int, 
+                 preprocessor:Preprocessor,
+                 data_dir: Path,
+                 drop_remainder:bool = False, 
+                 shuffle:bool = False,
+                 fast: bool = True):
         self.samples = samples
         self.batch_size = batch_size
         self.drop_remainder = drop_remainder
         self.preprocessor = preprocessor
         self.shuffle = shuffle
+        self.fast = fast
         self.curr_idx = 0
+
+        if fast:
+            self.env = lmdb.open(str(data_dir / 'lmdb'), readonly=True)
+
 
     def has_next(self) -> bool:
         """Is there a next element?"""
