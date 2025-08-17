@@ -36,6 +36,25 @@ class DataLoaderIAM:
         self.batch_size = batch_size
         self.samples = []
 
+        samples, alphabet = self.load_samples(data_dir)
+
+        # split into training and validation set: 95% - 5%
+        split_idx = int(data_split * len(self.samples))
+        self.train_samples = self.samples[:split_idx]
+        self.validation_samples = self.samples[split_idx:]
+
+        # put words into lists
+        self.train_words = [x.gt_text for x in self.train_samples]
+        self.validation_words = [x.gt_text for x in self.validation_samples]
+
+        # start with train set
+        self.train_set()
+
+        # list of all chars in dataset
+        self.char_list = sorted(list(alphabet))
+        self.samples = samples
+
+    def load_samples(self, data_dir):
         ground_truths_file = open(data_dir / 'gt/words.txt')
         samples = []
         alphabet = set()
@@ -62,22 +81,7 @@ class DataLoaderIAM:
 
             # put sample into list
             samples.append(Sample(ground_truth_text, image_path))
-
-        # split into training and validation set: 95% - 5%
-        split_idx = int(data_split * len(self.samples))
-        self.train_samples = self.samples[:split_idx]
-        self.validation_samples = self.samples[split_idx:]
-
-        # put words into lists
-        self.train_words = [x.gt_text for x in self.train_samples]
-        self.validation_words = [x.gt_text for x in self.validation_samples]
-
-        # start with train set
-        self.train_set()
-
-        # list of all chars in dataset
-        self.char_list = sorted(list(alphabet))
-        self.samples = samples
+        return samples,alphabet
 
     def parse_image_path(self, data_dir, line_split):
         file_name_split = line_split[0].split('-')
