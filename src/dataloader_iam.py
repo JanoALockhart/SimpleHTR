@@ -64,15 +64,14 @@ class DataLoaderIAM:
             line = line.strip()
             line_split = line.split(' ')
             assert len(line_split) >= 9
-            
-            if not line or line[0] == '#':
+
+            if not line or line[0] == '#' or line_split[0] in bad_samples_reference:
+                if line_split[0] in bad_samples_reference:
+                    print('Ignoring known broken image:', image_path)
+    
                 continue
 
             image_path = self.parse_image_path(data_dir, line_split)
-
-            if line_split[0] in bad_samples_reference:
-                print('Ignoring known broken image:', image_path)
-                continue
 
             # GT text are columns starting at 9
             ground_truth_text = ' '.join(line_split[8:])
