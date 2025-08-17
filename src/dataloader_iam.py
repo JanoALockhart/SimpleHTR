@@ -62,13 +62,12 @@ class DataLoaderIAM:
         for line in ground_truths_file:
             # ignore empty and comment lines
             line = line.strip()
+            line_split = line.split(' ')
+            assert len(line_split) >= 9
+            
             if not line or line[0] == '#':
                 continue
 
-            line_split = line.split(' ')
-            assert len(line_split) >= 9
-
-            # filename: part1-part2-part3 --> part1/part1-part2/part1-part2-part3.png
             image_path = self.parse_image_path(data_dir, line_split)
 
             if line_split[0] in bad_samples_reference:
@@ -84,6 +83,7 @@ class DataLoaderIAM:
         return samples,alphabet
 
     def parse_image_path(self, data_dir, line_split):
+        # filename: part1-part2-part3 --> part1/part1-part2/part1-part2-part3.png
         file_name_split = line_split[0].split('-')
         fist_subdir_name = file_name_split[0]
         second_subdir_name = f'{file_name_split[0]}-{file_name_split[1]}'
