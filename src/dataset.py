@@ -41,12 +41,5 @@ class DatasetLoader(ABC):
     def get_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
         """Returns the training, validation and test datasets"""
         pass
-
-class IAMDatasetLoader(DatasetLoader):
-    def __init__(self):
-        super().__init__()
-        #Read gt file
-        #Mix?
-        #Definir tamaños train, validation y test sets
-        
+ 
         
