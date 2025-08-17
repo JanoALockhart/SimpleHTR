@@ -22,16 +22,6 @@ class Batch:
     gt_texts: list
     batch_size: int
 
-class ImagePreprocessor(ABC):
-    @abstractmethod
-    def process_batch(self, batch: Batch) -> Batch:
-        pass
-
-class ImageLoader(ABC):
-    @abstractmethod
-    def get_img(self):
-        pass
-
 class AbstractDataset(ABC):
     @abstractmethod
     def has_next(self) -> bool:
