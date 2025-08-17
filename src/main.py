@@ -54,7 +54,7 @@ def main():
             f.write(''.join(char_list))
 
         with open(Settings.CORPUS_FILE_PATH, 'w') as f:
-            f.write(' '.join(loader.train_words + loader.validation_words))
+            f.write(' '.join(loader.corpus))
 
         model = Model(char_list, decoder_type)
         model.train(loader, line_mode=args.line_mode, early_stopping=args.early_stopping)

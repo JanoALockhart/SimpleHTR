@@ -33,8 +33,7 @@ class DataLoaderIAM:
         self.train_samples, self.validation_samples = self.split_dataset(data_split, batch_size, data_dir, fast)
 
         # put words into lists
-        self.train_words = [x.gt_text for x in self.train_samples]
-        self.validation_words = [x.gt_text for x in self.validation_samples]
+        self.corpus = [x.gt_text for x in self.samples]
 
         # list of all chars in dataset
         self.char_list = sorted(list(alphabet))
