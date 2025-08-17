@@ -37,7 +37,8 @@ class DataLoaderIAM:
         self.samples = []
 
         ground_truths_file = open(data_dir / 'gt/words.txt')
-        chars = set()
+        samples = []
+        alphabet = set()
         bad_samples_reference = ['a01-117-05-02', 'r06-022-03-05']  # known broken images in IAM dataset
         for line in ground_truths_file:
             # ignore empty and comment lines
@@ -49,18 +50,18 @@ class DataLoaderIAM:
             assert len(line_split) >= 9
 
             # filename: part1-part2-part3 --> part1/part1-part2/part1-part2-part3.png
-            file_path = self.parse_image_path(data_dir, line_split)
+            image_path = self.parse_image_path(data_dir, line_split)
 
             if line_split[0] in bad_samples_reference:
-                print('Ignoring known broken image:', file_path)
+                print('Ignoring known broken image:', image_path)
                 continue
 
             # GT text are columns starting at 9
-            gt_text = ' '.join(line_split[8:])
-            chars = chars.union(set(list(gt_text)))
+            ground_truth_text = ' '.join(line_split[8:])
+            alphabet = alphabet.union(set(list(ground_truth_text)))
 
             # put sample into list
-            self.samples.append(Sample(gt_text, file_path))
+            samples.append(Sample(ground_truth_text, image_path))
 
         # split into training and validation set: 95% - 5%
         split_idx = int(data_split * len(self.samples))
@@ -75,7 +76,8 @@ class DataLoaderIAM:
         self.train_set()
 
         # list of all chars in dataset
-        self.char_list = sorted(list(chars))
+        self.char_list = sorted(list(alphabet))
+        self.samples = samples
 
     def parse_image_path(self, data_dir, line_split):
         file_name_split = line_split[0].split('-')
