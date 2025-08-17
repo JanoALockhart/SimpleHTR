@@ -7,10 +7,10 @@ import lmdb
 import numpy as np
 from path import Path
 
-from dataset import AbstractDataset, Batch, Sample
+from dataset import AbstractDataset, Batch, DatasetLoader, Sample
 from preprocessor import Preprocessor
 
-class DataLoaderIAM:
+class DataLoaderIAM(DatasetLoader):
     """
     Loads data which corresponds to IAM format,
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
@@ -36,6 +36,9 @@ class DataLoaderIAM:
             fast
         )
         self.corpus = [x.gt_text for x in self.samples]
+    
+    def get_datasets(self):
+        return self.train_dataset, self.validation_dataset, self.test_dataset
 
     def _build_char_list(self):
         alphabet = set()
