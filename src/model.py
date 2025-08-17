@@ -329,6 +329,7 @@ class Model:
         train_loss_in_epoch = []
 
         preprocessor = Preprocessor(self.get_img_size(line_mode), data_augmentation=True, line_mode=line_mode)
+        train_set.map(preprocessor)
         best_char_error_rate = float('inf')  # best validation character error rate
         no_improvement_since = 0  # number of epochs no improvement of character error rate occurred
         # stop training after this number of epochs without improvement
@@ -344,7 +345,6 @@ class Model:
             while train_set.has_next():
                 iter_info = train_set.get_iterator_info()
                 batch = train_set.get_next()
-                batch = preprocessor.process_batch(batch)
                 loss = self.train_batch(batch)
                 print(f'Epoch: {epoch} Batch: {iter_info[0]}/{iter_info[1]} Loss: {loss}')
                 train_loss_in_epoch.append(loss)
@@ -387,6 +387,7 @@ class Model:
         print('Validate NN')
         validation_set.reset_iterator()
         preprocessor = Preprocessor(self.get_img_size(line_mode), line_mode=line_mode)
+        validation_set.map(preprocessor)
         num_char_err = 0
         num_char_total = 0
         num_word_ok = 0
@@ -395,7 +396,6 @@ class Model:
             iter_info = validation_set.get_iterator_info()
             print(f'Batch: {iter_info[0]} / {iter_info[1]}')
             batch = validation_set.get_next()
-            batch = preprocessor.process_batch(batch)
             recognized, _ = self.infer_batch(batch)
 
             print('Ground truth -> Recognized')
