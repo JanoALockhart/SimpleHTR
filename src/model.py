@@ -14,7 +14,7 @@ from dataset import Batch
 from settings import Settings
 from preprocessor import Preprocessor
 from summary_writer import SummaryWriter, EpochSummary
-from dataloader_iam import DataLoaderIAM
+from dataloader_iam import DataLoaderIAM, Dataset
 
 class DecoderType:
     """CTC decoder types."""
@@ -318,7 +318,8 @@ class Model:
         return 128, self.get_img_height()
 
     def train(self,
-            loader: DataLoaderIAM,
+            train_set: Dataset,
+            validation_set: Dataset,
             line_mode: bool,
             early_stopping: int = 25) -> None:
         """Trains NN."""
@@ -339,10 +340,10 @@ class Model:
             # train
             print('Train NN')
             start_time = time.time()
-            loader.train_set()
-            while loader.has_next():
-                iter_info = loader.get_iterator_info()
-                batch = loader.get_next()
+            train_set.reset_iterator()
+            while train_set.has_next():
+                iter_info = train_set.get_iterator_info()
+                batch = train_set.get_next()
                 batch = preprocessor.process_batch(batch)
                 loss = self.train_batch(batch)
                 print(f'Epoch: {epoch} Batch: {iter_info[0]}/{iter_info[1]} Loss: {loss}')
@@ -350,7 +351,7 @@ class Model:
 
             end_time = time.time()
             # validate
-            char_error_rate, word_accuracy = self.validate(loader, line_mode)
+            char_error_rate, word_accuracy = self.validate(validation_set, line_mode)
 
             # write summary
             epoch_summary = EpochSummary(
@@ -381,19 +382,19 @@ class Model:
                 break
 
 
-    def validate(self, loader: DataLoaderIAM, line_mode: bool) -> Tuple[float, float]:
+    def validate(self, validation_set: Dataset, line_mode: bool) -> Tuple[float, float]:
         """Validates NN."""
         print('Validate NN')
-        loader.validation_set()
+        validation_set.reset_iterator()
         preprocessor = Preprocessor(self.get_img_size(line_mode), line_mode=line_mode)
         num_char_err = 0
         num_char_total = 0
         num_word_ok = 0
         num_word_total = 0
-        while loader.has_next():
-            iter_info = loader.get_iterator_info()
+        while validation_set.has_next():
+            iter_info = validation_set.get_iterator_info()
             print(f'Batch: {iter_info[0]} / {iter_info[1]}')
-            batch = loader.get_next()
+            batch = validation_set.get_next()
             batch = preprocessor.process_batch(batch)
             recognized, _ = self.infer_batch(batch)
 
