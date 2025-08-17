@@ -1,5 +1,5 @@
 import argparse
-from typing import List
+from typing import List, Tuple
 from path import Path
 import tensorflow as tf
 
