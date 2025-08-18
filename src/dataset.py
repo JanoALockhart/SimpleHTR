@@ -1,12 +1,8 @@
 from abc import ABC, abstractmethod
-import pickle
 import random
 from typing import List, Tuple
 
-import cv2
-import lmdb
 import numpy as np
-from path import Path
 
 from dataset_structure import Batch, Sample
 from preprocessor import Preprocessor
@@ -32,20 +28,14 @@ class Dataset(AbstractDataset):
     def __init__(self, 
                  samples:List[Sample], 
                  batch_size:int,
-                 data_dir: Path,
                  drop_remainder:bool = False, 
-                 shuffle:bool = False,
-                 fast: bool = True):
+                 shuffle:bool = False):
         self.samples = samples
         self.batch_size = batch_size
         self.drop_remainder = drop_remainder
         self.shuffle = shuffle
-        self.fast = fast
         self.curr_idx = 0
         self.preprocessor: Preprocessor = None
-
-        if fast:
-            self.env = lmdb.open(str(data_dir / 'lmdb'), readonly=True)
 
     def map(self, preprocessor: Preprocessor) -> AbstractDataset:
         self.preprocessor = preprocessor
@@ -71,7 +61,7 @@ class Dataset(AbstractDataset):
         """Get next element."""
         batch_range = range(self.curr_idx, min(self.curr_idx + self.batch_size, len(self.samples)))
 
-        imgs = [self._get_img(i) for i in batch_range]
+        imgs = [self.preprocessor._get_img(self.samples[i].file_path) for i in batch_range]
         gt_texts = [self.samples[i].gt_text for i in batch_range]
 
         self.curr_idx += self.batch_size
@@ -80,17 +70,6 @@ class Dataset(AbstractDataset):
             batch = self.preprocessor.process_batch(batch)
 
         return batch
-
-    def _get_img(self, i: int) -> np.ndarray:
-        if self.fast:
-            with self.env.begin() as txn:
-                basename = Path(self.samples[i].file_path).basename()
-                data = txn.get(basename.encode("ascii"))
-                img = pickle.loads(data)
-        else:
-            img = cv2.imread(self.samples[i].file_path, cv2.IMREAD_GRAYSCALE)
-
-        return img
     
     def reset_iterator(self):
         if self.shuffle:

@@ -1,8 +1,11 @@
+import pickle
 import random
 from typing import Tuple
 
 import cv2
+import lmdb
 import numpy as np
+from path import Path
 
 from dataset_structure import Batch
 
@@ -19,10 +22,12 @@ def get_img_size(line_mode: bool = False) -> Tuple[int, int]:
 
 class Preprocessor:
     def __init__(self,
+                 data_dir: Path,
                  padding: int = 0,
                  dynamic_width: bool = False,
                  data_augmentation: bool = False,
-                 line_mode: bool = False) -> None:
+                 line_mode: bool = False,
+                 fast: bool = True) -> None:
         # dynamic width only supported when no data augmentation happens
         assert not (dynamic_width and data_augmentation)
         # when padding is on, we need dynamic width enabled
@@ -33,6 +38,9 @@ class Preprocessor:
         self.dynamic_width = dynamic_width
         self.data_augmentation = data_augmentation
         self.line_mode = line_mode
+        self.fast = fast
+        if fast:
+            self.env = lmdb.open(str(data_dir / 'lmdb'), readonly=True)
 
     @staticmethod
     def _truncate_label(text: str, max_text_len: int) -> str:
@@ -281,4 +289,15 @@ class Preprocessor:
         max_text_len = res_imgs[0].shape[0] // 4
         res_gt_texts = [self._truncate_label(gt_text, max_text_len) for gt_text in batch.gt_texts]
         return Batch(res_imgs, res_gt_texts, batch.batch_size)
+    
+    def _get_img(self, path: str) -> np.ndarray:
+        if self.fast:
+            with self.env.begin() as txn:
+                basename = Path(path).basename()
+                data = txn.get(basename.encode("ascii"))
+                img = pickle.loads(data)
+        else:
+            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+
+        return img
     
