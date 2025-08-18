@@ -1,12 +1,13 @@
 import argparse
-from typing import List, Tuple
 from path import Path
 import tensorflow as tf
+import random
+import numpy as np
 
 from preprocessor import Preprocessor
-from settings import Settings
 from dataloader_iam import DataLoaderIAM
 from model import Model, DecoderType
+from settings import Settings
 
 def parse_args() -> argparse.Namespace:
     """Parses arguments from the command line."""
@@ -29,6 +30,11 @@ def main():
     """Main function."""
     # Disable eager mode
     tf.compat.v1.disable_eager_execution()
+
+    # Seting seed
+    random.seed(Settings.SEED)
+    np.random.seed(Settings.SEED)
+    tf.random.set_seed(Settings.SEED)
 
     # parse arguments and set CTC decoder
     args = parse_args()
