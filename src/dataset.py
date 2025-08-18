@@ -76,9 +76,9 @@ class Dataset(AbstractDataset):
 
         self.curr_idx += self.batch_size
         batch = Batch(imgs, gt_texts, len(imgs))
-        if Preprocessor is not None:
-            self.preprocessor.process_batch(batch)
-            
+        if self.preprocessor is not None:
+            batch = self.preprocessor.process_batch(batch)
+
         return batch
 
     def _get_img(self, i: int) -> np.ndarray:
