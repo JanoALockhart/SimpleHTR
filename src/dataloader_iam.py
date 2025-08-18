@@ -24,7 +24,6 @@ class DataLoaderIAM(DatasetLoader):
                  batch_size: int,
                  train_split: float = 0.95,
                  validation_split: float = 0.04,
-                 fast: bool = True,
                  line_mode: bool = False) -> None:
         """Loader for dataset."""
 
@@ -35,9 +34,7 @@ class DataLoaderIAM(DatasetLoader):
         self.train_set, self.validation_set, self.test_set = self.split_dataset(
             train_split, 
             validation_split, 
-            batch_size, 
-            data_dir, 
-            fast
+            batch_size
         )
         self.corpus = [x.gt_text for x in self.samples]
         # when in line mode, take care to have a whitespace in the char list
@@ -62,7 +59,7 @@ class DataLoaderIAM(DatasetLoader):
             alphabet = alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
-    def split_dataset(self, train_split, validation_split, batch_size, data_dir, fast) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
+    def split_dataset(self, train_split, validation_split, batch_size) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
         # split into training and validation set: 95% - 4% - 1%
         dataset_size = len(self.samples)
         train_size = int(train_split * dataset_size)
