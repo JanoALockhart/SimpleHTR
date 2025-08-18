@@ -1,4 +1,5 @@
-
+from typing import List
+import numpy as np
 from dataclasses import dataclass
 
 @dataclass
@@ -8,6 +9,6 @@ class Sample:
 
 @dataclass
 class Batch:
-    imgs: list
-    gt_texts: list
+    imgs: List[np.ndarray]
+    gt_texts: List[str]
     batch_size: int
