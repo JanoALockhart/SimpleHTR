@@ -41,13 +41,13 @@ def main():
                        'wordbeamsearch': DecoderType.WordBeamSearch}
     decoder_type = decoder_mapping[args.decoder]
 
-    loader = DataLoaderIAM(args.data_dir, args.batch_size)
+    loader = DataLoaderIAM(args.data_dir)
     train_set, validation_set, test_set = loader.get_datasets()
 
     train_preprocessor = Preprocessor(args.data_dir, data_augmentation=True, line_mode=args.line_mode)
-    train_set.map(train_preprocessor)
+    train_set.map(train_preprocessor).batch(args.batch_size)
     validation_preprocessor = Preprocessor(args.data_dir, line_mode=args.line_mode)
-    validation_set.map(validation_preprocessor)
+    validation_set.map(validation_preprocessor).batch(args.batch_size)
 
     # train the model
     if args.mode == 'train':
