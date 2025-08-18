@@ -69,13 +69,13 @@ class DataLoaderIAM(DatasetLoader):
         validation_size = int(validation_split * dataset_size)
 
         train_samples = self.samples[0:train_size]
-        train_set = Dataset(train_samples, batch_size, data_dir, drop_remainder=True, shuffle=True, fast=fast)
+        train_set = Dataset(train_samples, batch_size, drop_remainder=True, shuffle=True)
 
         validation_samples = self.samples[train_size:train_size + validation_size]
-        validation_set = Dataset(validation_samples, batch_size, data_dir)
+        validation_set = Dataset(validation_samples, batch_size)
 
         test_samples = self.samples[train_size + validation_size:]
-        test_set = Dataset(test_samples, batch_size, data_dir)
+        test_set = Dataset(test_samples, batch_size)
 
         return train_set, validation_set, test_set
 
