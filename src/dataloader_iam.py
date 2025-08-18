@@ -21,7 +21,6 @@ class DataLoaderIAM(DatasetLoader):
 
     def __init__(self,
                  data_dir: Path,
-                 batch_size: int,
                  train_split: float = 0.95,
                  validation_split: float = 0.04,
                  line_mode: bool = False) -> None:
@@ -33,8 +32,7 @@ class DataLoaderIAM(DatasetLoader):
         self.char_list = self._build_char_list()
         self.train_set, self.validation_set, self.test_set = self.split_dataset(
             train_split, 
-            validation_split, 
-            batch_size
+            validation_split
         )
         self.corpus = [x.gt_text for x in self.samples]
         # when in line mode, take care to have a whitespace in the char list
@@ -59,20 +57,20 @@ class DataLoaderIAM(DatasetLoader):
             alphabet = alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
-    def split_dataset(self, train_split, validation_split, batch_size) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
+    def split_dataset(self, train_split, validation_split) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
         # split into training and validation set: 95% - 4% - 1%
         dataset_size = len(self.samples)
         train_size = int(train_split * dataset_size)
         validation_size = int(validation_split * dataset_size)
 
         train_samples = self.samples[0:train_size]
-        train_set = Dataset(train_samples, batch_size, drop_remainder=True, shuffle=True)
+        train_set = Dataset(train_samples, drop_remainder=True, shuffle=True)
 
         validation_samples = self.samples[train_size:train_size + validation_size]
-        validation_set = Dataset(validation_samples, batch_size)
+        validation_set = Dataset(validation_samples)
 
         test_samples = self.samples[train_size + validation_size:]
-        test_set = Dataset(test_samples, batch_size)
+        test_set = Dataset(test_samples)
 
         return train_set, validation_set, test_set
 

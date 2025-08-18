@@ -24,14 +24,17 @@ class AbstractDataset(ABC):
     def map(self, preprocessor: Preprocessor) -> "AbstractDataset":
         pass
 
+    @abstractmethod
+    def batch(self, batch_size: int) -> "AbstractDataset":
+        pass
+
 class Dataset(AbstractDataset):
     def __init__(self, 
                  samples:List[Sample], 
-                 batch_size:int,
                  drop_remainder:bool = False, 
                  shuffle:bool = False):
         self.samples = samples
-        self.batch_size = batch_size
+        self.batch_size = 32
         self.drop_remainder = drop_remainder
         self.shuffle = shuffle
         self.curr_idx = 0
@@ -75,5 +78,9 @@ class Dataset(AbstractDataset):
         if self.shuffle:
             random.shuffle(self.samples)
         self.curr_idx = 0
+
+    def batch(self, batch_size: int):
+        self.batch_size = batch_size
+        return self
 
         
