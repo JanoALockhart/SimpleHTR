@@ -13,6 +13,10 @@ class DatasetLoader(ABC):
         """Returns the training, validation and test datasets"""
         pass
 
+    @abstractmethod
+    def get_char_list(self) -> List[str]:
+        pass
+
 class DataLoaderIAM(DatasetLoader):
     """
     Loads data which corresponds to IAM format,
@@ -22,31 +26,29 @@ class DataLoaderIAM(DatasetLoader):
     def __init__(self,
                  data_dir: Path,
                  train_split: float = 0.95,
-                 validation_split: float = 0.04,
-                 line_mode: bool = False) -> None:
+                 validation_split: float = 0.04) -> None:
         """Loader for dataset."""
 
         assert data_dir.exists()
 
         self.samples = self.load_samples(data_dir)
         self.char_list = self._build_char_list()
+        if ' ' not in self.char_list:
+            self.char_list = [' '] + self.char_list
+
         self.train_set, self.validation_set, self.test_set = self.split_dataset(
             train_split, 
             validation_split
         )
-        self.corpus = [x.gt_text for x in self.samples]
-        # when in line mode, take care to have a whitespace in the char list
-        if line_mode and ' ' not in self.char_list:
-            self.char_list = [' '] + self.char_list
 
-        # save characters and words
-        with open(Settings.CHAR_LIST_FILE_PATH, 'w') as f:
-            f.write(''.join(self.char_list))
+        self.corpus = [x.gt_text for x in self.samples]
 
         with open(Settings.CORPUS_FILE_PATH, 'w') as f:
             f.write(' '.join(self.corpus))
 
-    
+    def get_char_list(self):
+        return self.char_list
+
     def get_datasets(self):
         return self.train_set, self.validation_set, self.test_set
 
