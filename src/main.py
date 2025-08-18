@@ -8,10 +8,6 @@ from settings import Settings
 from dataloader_iam import DataLoaderIAM
 from model import Model, DecoderType
 
-def char_list_from_file() -> List[str]:
-    with open(Settings.CHAR_LIST_FILE_PATH) as f:
-        return list(f.read())
-
 def parse_args() -> argparse.Namespace:
     """Parses arguments from the command line."""
     parser = argparse.ArgumentParser()
@@ -51,17 +47,17 @@ def main():
 
     # train the model
     if args.mode == 'train':
-        model = Model(loader.char_list, decoder_type)
+        model = Model(loader.get_char_list(), decoder_type)
         model.train(train_set, validation_set, early_stopping=args.early_stopping)
 
     # evaluate it on the validation set
     elif args.mode == 'validate':
-        model = Model(char_list_from_file(), decoder_type, must_restore=True)
+        model = Model(loader.get_char_list(), decoder_type, must_restore=True)
         model.validate(validation_set)
 
     # infer text on test image
     elif args.mode == 'infer':
-        model = Model(char_list_from_file(), decoder_type, must_restore=True, dump=args.dump)
+        model = Model(loader.get_char_list(), decoder_type, must_restore=True, dump=args.dump)
         model.infer(args.img_file)
 
 
