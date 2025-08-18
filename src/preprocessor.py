@@ -54,48 +54,52 @@ class Preprocessor:
     def _simulate_text_line(self, batch: Batch) -> Batch:
         """Create image of a text line by pasting multiple word images into an image."""
 
-        default_word_sep = 30
-        default_num_words = 5
+        default_word_separation = 30
+        default_words_in_line = 5
 
         # go over all batch elements
-        res_imgs = []
-        res_gt_texts = []
+        result_imgs = []
+        result_groundtruth_texts = []
         for i in range(batch.batch_size):
             # number of words to put into current line
-            num_words = random.randint(1, 8) if self.data_augmentation else default_num_words
+            min_words_in_line = 1
+            max_words_in_line = 8
+            num_words_in_line = random.randint(min_words_in_line, max_words_in_line) if self.data_augmentation else default_words_in_line
 
             # concat ground truth texts
-            curr_gt = ' '.join([batch.gt_texts[(i + j) % batch.batch_size] for j in range(num_words)])
-            res_gt_texts.append(curr_gt)
+            current_groundtruth = ' '.join([batch.gt_texts[(i + j) % batch.batch_size] for j in range(num_words_in_line)])
+            result_groundtruth_texts.append(current_groundtruth)
 
             # put selected word images into list, compute target image size
-            sel_imgs = []
-            word_seps = [0]
-            h = 0
-            w = 0
-            for j in range(num_words):
-                curr_sel_img = batch.imgs[(i + j) % batch.batch_size]
-                curr_word_sep = random.randint(20, 50) if self.data_augmentation else default_word_sep
-                h = max(h, curr_sel_img.shape[0])
-                w += curr_sel_img.shape[1]
-                sel_imgs.append(curr_sel_img)
-                if j + 1 < num_words:
-                    w += curr_word_sep
-                    word_seps.append(curr_word_sep)
+            selected_imgs = []
+            word_separations = [0]
+            target_height = 0
+            target_width = 0
+            for j in range(num_words_in_line):
+                current_selected_img = batch.imgs[(i + j) % batch.batch_size]
+                min_separation = 20
+                max_separation = 50
+                current_word_separation = random.randint(min_separation, max_separation) if self.data_augmentation else default_word_separation
+                target_height = max(target_height, current_selected_img.shape[0])
+                target_width += current_selected_img.shape[1]
+                selected_imgs.append(current_selected_img)
+                if j + 1 < num_words_in_line:
+                    target_width += current_word_separation
+                    word_separations.append(current_word_separation)
 
             # put all selected word images into target image
-            target = np.ones([h, w], np.uint8) * 255
+            target = np.ones([target_height, target_width], np.uint8) * 255
             x = 0
-            for curr_sel_img, curr_word_sep in zip(sel_imgs, word_seps):
-                x += curr_word_sep
-                y = (h - curr_sel_img.shape[0]) // 2
-                target[y:y + curr_sel_img.shape[0]:, x:x + curr_sel_img.shape[1]] = curr_sel_img
-                x += curr_sel_img.shape[1]
+            for current_selected_img, current_word_separation in zip(selected_imgs, word_separations):
+                x += current_word_separation
+                y = (target_height - current_selected_img.shape[0]) // 2
+                target[y:y + current_selected_img.shape[0]:, x:x + current_selected_img.shape[1]] = current_selected_img
+                x += current_selected_img.shape[1]
 
             # put image of line into result
-            res_imgs.append(target)
+            result_imgs.append(target)
 
-        return Batch(res_imgs, res_gt_texts, batch.batch_size)
+        return Batch(result_imgs, result_groundtruth_texts, batch.batch_size)
 
     def process_img(self, img: np.ndarray) -> np.ndarray:
         """Resize to target size, apply data augmentation."""
