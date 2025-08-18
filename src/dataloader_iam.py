@@ -31,12 +31,12 @@ class DataLoaderIAM(DatasetLoader):
 
         assert data_dir.exists()
 
-        self.samples = self.load_samples(data_dir)
+        self.samples = self._load_samples(data_dir)
         self.char_list = self._build_char_list()
         if ' ' not in self.char_list:
             self.char_list = [' '] + self.char_list
 
-        self.train_set, self.validation_set, self.test_set = self.split_dataset(
+        self.train_set, self.validation_set, self.test_set = self._split_dataset(
             train_split, 
             validation_split
         )
@@ -59,7 +59,7 @@ class DataLoaderIAM(DatasetLoader):
             alphabet = alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
-    def split_dataset(self, train_split, validation_split) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
+    def _split_dataset(self, train_split, validation_split) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
         # split into training and validation set: 95% - 4% - 1%
         dataset_size = len(self.samples)
         train_size = int(train_split * dataset_size)
@@ -76,7 +76,7 @@ class DataLoaderIAM(DatasetLoader):
 
         return train_set, validation_set, test_set
 
-    def load_samples(self, data_dir) -> List[Sample]:
+    def _load_samples(self, data_dir) -> List[Sample]:
         ground_truths_file = open(data_dir / 'gt/words.txt')
         samples = []
         

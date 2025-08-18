@@ -290,7 +290,7 @@ class Preprocessor:
         res_gt_texts = [self._truncate_label(gt_text, max_text_len) for gt_text in batch.gt_texts]
         return Batch(res_imgs, res_gt_texts, batch.batch_size)
     
-    def _get_img(self, path: str) -> np.ndarray:
+    def get_img(self, path: str) -> np.ndarray:
         if self.fast:
             with self.env.begin() as txn:
                 basename = Path(path).basename()
