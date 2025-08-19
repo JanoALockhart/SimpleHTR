@@ -53,17 +53,17 @@ def main():
 
     # train the model
     if args.mode == 'train':
-        model = Model(loader.get_char_list(), decoder_type)
+        model = Model(loader.get_alphabet(), decoder_type)
         model.train(train_set, validation_set, early_stopping=args.early_stopping)
 
     # evaluate it on the validation set
     elif args.mode == 'validate':
-        model = Model(loader.get_char_list(), decoder_type, must_restore=True)
+        model = Model(loader.get_alphabet(), decoder_type, must_restore=True)
         model.validate(validation_set)
 
     # infer text on test image
     elif args.mode == 'infer':
-        model = Model(loader.get_char_list(), decoder_type, must_restore=True, dump=args.dump)
+        model = Model(loader.get_alphabet(), decoder_type, must_restore=True, dump=args.dump)
         model.infer(args.img_file)
 
 

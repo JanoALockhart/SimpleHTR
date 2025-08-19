@@ -35,7 +35,7 @@ class DatasetLoader(ABC):
         return train_set, validation_set, test_set
 
     @abstractmethod
-    def get_char_list(self) -> List[str]:
+    def get_alphabet(self) -> List[str]:
         pass
 
     @abstractmethod
@@ -73,7 +73,7 @@ class IAMDataLoader(DatasetLoader):
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
     """
 
-    def get_char_list(self):
+    def get_alphabet(self):
         return self.alphabet
     
     def get_corpus(self):
