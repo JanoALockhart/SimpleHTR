@@ -18,8 +18,6 @@ class DatasetLoader(ABC):
 
         self.samples = self._load_samples(data_dir)
         self.char_list = self._build_char_list()
-        if ' ' not in self.char_list:
-            self.char_list = [' '] + self.char_list
 
         self.corpus = [x.gt_text for x in self.samples]
 
@@ -50,6 +48,7 @@ class DatasetLoader(ABC):
 
     def _build_char_list(self):
         alphabet = set()
+        alphabet.add(' ')
         for example in self.samples:
             unique_letters = set(list(example.gt_text))
             alphabet = alphabet.union(unique_letters)
@@ -80,7 +79,7 @@ class DataLoaderIAM(DatasetLoader):
     def get_corpus(self):
         with open(Settings.CORPUS_FILE_PATH, 'w') as f:
             f.write(' '.join(self.corpus))
-            
+
         return self.corpus
     
     def _load_samples(self, data_dir) -> List[Sample]:
