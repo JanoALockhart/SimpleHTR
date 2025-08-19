@@ -1,11 +1,8 @@
-import pickle
 import random
 from typing import Tuple
 
 import cv2
-import lmdb
 import numpy as np
-from path import Path
 
 from dataset_structure import Batch
 
@@ -22,12 +19,10 @@ def get_img_size(line_mode: bool = False) -> Tuple[int, int]:
 
 class Preprocessor:
     def __init__(self,
-                 data_dir: Path,
                  padding: int = 0,
                  dynamic_width: bool = False,
                  data_augmentation: bool = False,
-                 line_mode: bool = False,
-                 fast: bool = True) -> None:
+                 line_mode: bool = False) -> None:
         # dynamic width only supported when no data augmentation happens
         assert not (dynamic_width and data_augmentation)
         # when padding is on, we need dynamic width enabled
