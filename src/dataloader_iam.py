@@ -1,13 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
-from path import Path
-
-from dataset import AbstractDataset, Dataset
 from dataset_structure import Sample
 from settings import Settings
 
-class DatasetLoader(ABC):
+class DataLoader(ABC):
     @abstractmethod
     def get_alphabet(self) -> List[str]:
         pass
@@ -17,45 +14,31 @@ class DatasetLoader(ABC):
         pass
 
     @abstractmethod
-    def get_datasets(self):
+    def get_sample_sets(self) -> Tuple[List[Sample], List[Sample], List[Sample]]:
         pass
 
-class BaseDatasetLoader(DatasetLoader):
+class BaseDataLoader(DataLoader):
     samples: List[Sample]
     alphabet: List[str]
     corpus: List[str]
 
-    def __init__(self) -> None:
-        """Loader for dataset."""
+    def __init__(self, train_split: float = 0.95, validation_split:float = 0.04) -> None:
+        """Basic loader for only one dataset from the filesystem"""
+        self.train_split = train_split
+        self.validation_split = validation_split
         self.samples = self._load_samples()
 
         self.alphabet = self._build_alphabet()
         self.corpus = self._build_corpus()
 
+    @abstractmethod
+    def _load_samples(self):
+        """Override this method according to the dataset file structure and the ground truth file format"""
+        pass
+
     def _build_corpus(self):
         corpus_list = [x.gt_text for x in self.samples]
         return ' '.join(corpus_list)
-
-    def get_datasets(self, train_split: float = 0.95, validation_split: float = 0.04) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
-        train_samples, validation_samples, test_samples = self._split_samples(train_split, validation_split)
-
-        train_set = Dataset(train_samples, drop_remainder=True, shuffle=True)
-        validation_set = Dataset(validation_samples)
-        test_set = Dataset(test_samples)
-
-        return train_set, validation_set, test_set
-
-    @abstractmethod
-    def get_alphabet(self) -> List[str]:
-        pass
-
-    @abstractmethod
-    def get_corpus(self) -> str:
-        pass
-
-    @abstractmethod
-    def _load_samples(self):
-        pass
 
     def _build_alphabet(self):
         alphabet = set()
@@ -65,11 +48,10 @@ class BaseDatasetLoader(DatasetLoader):
             alphabet = alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
-    def _split_samples(self, train_split, validation_split) -> Tuple[List[Sample], List[Sample], List[Sample]]:
-        # split into training and validation set: 95% - 4% - 1%
+    def get_sample_sets(self) -> Tuple[List[Sample], List[Sample], List[Sample]]:
         dataset_size = len(self.samples)
-        train_size = int(train_split * dataset_size)
-        validation_size = int(validation_split * dataset_size)
+        train_size = int(self.train_split * dataset_size)
+        validation_size = int(self.validation_split * dataset_size)
 
         train_samples = self.samples[0:train_size]
         validation_samples = self.samples[train_size:train_size + validation_size]
@@ -78,7 +60,7 @@ class BaseDatasetLoader(DatasetLoader):
         return train_samples, validation_samples, test_samples
 
     
-class IAMDatasetLoader(BaseDatasetLoader):
+class IAMDataLoader(BaseDataLoader):
     """
     Loads data which corresponds to IAM format,
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
@@ -91,6 +73,7 @@ class IAMDatasetLoader(BaseDatasetLoader):
         return self.alphabet
     
     def get_corpus(self):
+        # TODO Remove this writing to a file 
         with open(Settings.CORPUS_FILE_PATH, 'w') as f:
             f.write(self.corpus)
 
@@ -106,7 +89,7 @@ class IAMDatasetLoader(BaseDatasetLoader):
             line_split = line.split(' ')
 
             if not self._ignore_line(line, line_split):
-                image_path = self.parse_image_path(data_dir, line_split)
+                image_path = self._parse_image_path(data_dir, line_split)
                 ground_truth_text = ' '.join(line_split[8:]) # GT text are columns starting at 9
                 samples.append(Sample(ground_truth_text, image_path))
 
@@ -122,7 +105,7 @@ class IAMDatasetLoader(BaseDatasetLoader):
 
         return ignore_line
     
-    def parse_image_path(self, data_dir, line_split):
+    def _parse_image_path(self, data_dir, line_split):
         # filename: part1-part2-part3 --> part1/part1-part2/part1-part2-part3.png
         file_name_split = line_split[0].split('-')
         fist_subdir_name = file_name_split[0]
