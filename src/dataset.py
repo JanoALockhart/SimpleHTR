@@ -5,7 +5,7 @@ from typing import List, Tuple
 import numpy as np
 
 from dataset_structure import Batch, Sample
-from image_loader import ImageLoader
+from image_loader import BaseImageLoader, ImageLoader
 from preprocessor import Preprocessor
 
 class Dataset(ABC):
@@ -19,6 +19,10 @@ class Dataset(ABC):
 
     @abstractmethod
     def get_iterator_info(self) -> Tuple[int, int]:
+        pass
+
+    @abstractmethod
+    def map(self, image_loader: ImageLoader) -> "Dataset":
         pass
 
     @abstractmethod
@@ -38,14 +42,17 @@ class Dataset(ABC):
         return BaseDataset(sample_list)
 
 class BaseDataset(Dataset):
-    def __init__(self, samples:List[Sample], image_loader:ImageLoader):
+    def __init__(self, samples:List[Sample]):
         self.samples = samples
         self.batch_size = 32
         self.drop_remainder = False
         self.must_shuffle = False
         self.curr_idx = 0
-        self.image_loader = image_loader
+        self.image_loader = BaseImageLoader()
         self.preprocessor: Preprocessor = None
+
+    def map(self, image_loader: ImageLoader):
+        self.image_loader = image_loader
 
     def map(self, preprocessor: Preprocessor) -> Dataset:
         self.preprocessor = preprocessor
