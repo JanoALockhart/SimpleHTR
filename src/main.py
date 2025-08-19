@@ -44,7 +44,7 @@ def main():
     decoder_type = decoder_mapping[args.decoder]
 
     loader = IAMDataLoader(args.data_dir)
-    train_set, validation_set, test_set = loader.get_datasets()
+    train_set, validation_set, test_set = loader.get_datasets(train_split=0.95, validation_split=0.04)
 
     train_preprocessor = Preprocessor(args.data_dir, data_augmentation=True, line_mode=args.line_mode)
     train_set.map(train_preprocessor).batch(args.batch_size)
