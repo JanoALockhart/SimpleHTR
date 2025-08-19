@@ -32,6 +32,11 @@ class AbstractDataset(ABC):
     def shuffle(self) -> "AbstractDataset":
         pass
 
+    @staticmethod
+    @abstractmethod
+    def dataset_from_sample_list(sample_list: List[Sample]) -> "AbstractDataset":
+        pass
+
 class Dataset(AbstractDataset):
     def __init__(self, samples:List[Sample]):
         self.samples = samples
@@ -89,4 +94,6 @@ class Dataset(AbstractDataset):
         self.must_shuffle = True
         return self
 
-        
+    def dataset_from_sample_list(sample_list: List[Sample]) -> "AbstractDataset":
+        return Dataset(sample_list)
+    
