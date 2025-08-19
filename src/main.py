@@ -4,7 +4,7 @@ import tensorflow as tf
 import random
 import numpy as np
 
-from dataset import Dataset, DatasetImpl
+from dataset import Dataset, BaseDataset
 from preprocessor import Preprocessor
 from dataloader_iam import IAMDataLoader
 from model import Model, DecoderType

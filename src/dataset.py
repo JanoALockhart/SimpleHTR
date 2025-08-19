@@ -5,6 +5,7 @@ from typing import List, Tuple
 import numpy as np
 
 from dataset_structure import Batch, Sample
+from image_loader import ImageLoader
 from preprocessor import Preprocessor
 
 class Dataset(ABC):
@@ -34,15 +35,16 @@ class Dataset(ABC):
 
     @staticmethod
     def dataset_from_sample_list(sample_list: List[Sample]) -> "Dataset":
-        return DatasetImpl(sample_list)
+        return BaseDataset(sample_list)
 
-class DatasetImpl(Dataset):
-    def __init__(self, samples:List[Sample]):
+class BaseDataset(Dataset):
+    def __init__(self, samples:List[Sample], image_loader:ImageLoader):
         self.samples = samples
         self.batch_size = 32
         self.drop_remainder = False
         self.must_shuffle = False
         self.curr_idx = 0
+        self.image_loader = image_loader
         self.preprocessor: Preprocessor = None
 
     def map(self, preprocessor: Preprocessor) -> Dataset:
@@ -69,7 +71,7 @@ class DatasetImpl(Dataset):
         """Get next element."""
         batch_range = range(self.curr_idx, min(self.curr_idx + self.batch_size, len(self.samples)))
 
-        imgs = [self.preprocessor.load_image(self.samples[i].file_path) for i in batch_range]
+        imgs = [self.image_loader.load_image(self.samples[i].file_path) for i in batch_range]
         gt_texts = [self.samples[i].gt_text for i in batch_range]
 
         self.curr_idx += self.batch_size
