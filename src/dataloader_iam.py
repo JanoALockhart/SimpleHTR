@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
+from dataset import Dataset
 from dataset_structure import Sample
 from settings import Settings
 
-class DataLoader(ABC):
+class DatasetLoader(ABC):
     @abstractmethod
     def get_alphabet(self) -> List[str]:
         pass
@@ -14,10 +15,10 @@ class DataLoader(ABC):
         pass
 
     @abstractmethod
-    def get_sample_sets(self) -> Tuple[List[Sample], List[Sample], List[Sample]]:
+    def get_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
         pass
 
-class BaseDataLoader(DataLoader):
+class BaseDatasetLoader(DatasetLoader):
     samples: List[Sample]
     alphabet: List[str]
     corpus: List[str]
@@ -49,7 +50,7 @@ class BaseDataLoader(DataLoader):
             alphabet = alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
-    def get_sample_sets(self) -> Tuple[List[Sample], List[Sample], List[Sample]]:
+    def split_samples(self) -> Tuple[List[Sample], List[Sample], List[Sample]]:
         dataset_size = len(self.samples)
         train_size = int(self.train_split * dataset_size)
         validation_size = int(self.validation_split * dataset_size)
@@ -60,8 +61,15 @@ class BaseDataLoader(DataLoader):
 
         return train_samples, validation_samples, test_samples
 
+    def get_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
+        train_samples, validation_samples, test_samples = self.split_samples()
+        train_set = Dataset.dataset_from_sample_list(train_samples)
+        validation_set = Dataset.dataset_from_sample_list(validation_samples)
+        test_set = Dataset.dataset_from_sample_list(test_samples)
+        return train_set,validation_set
+
     
-class IAMDataLoader(BaseDataLoader):
+class IAMDataLoader(BaseDatasetLoader):
     """
     Loads data which corresponds to IAM format,
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database

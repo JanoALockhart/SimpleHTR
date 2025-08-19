@@ -45,37 +45,34 @@ def main():
                        'wordbeamsearch': DecoderType.WordBeamSearch}
     decoder_type = decoder_mapping[args.decoder]
 
-    sample_loader = IAMDataLoader(args.data_dir, train_split=0.95, validation_split=0.04)
+    datasets_loader = IAMDataLoader(args.data_dir, train_split=0.95, validation_split=0.04)
     
     image_loader = BaseImageLoader()
     if args.fast:
         image_loader = LMDBImageLoader(args.data_dir)
     
-    train_samples, validation_samples, test_samples = sample_loader.get_sample_sets()
+    train_set, validation_set, test_set = datasets_loader.get_datasets()
 
     train_preprocessor = Preprocessor(data_augmentation=True, line_mode=args.line_mode)
-    train_set = Dataset.dataset_from_sample_list(train_samples)
     train_set.set_image_loader(image_loader).map(train_preprocessor).batch(args.batch_size, drop_remainder=True).shuffle()
 
     validation_preprocessor = Preprocessor(line_mode=args.line_mode)
-    validation_set = Dataset.dataset_from_sample_list(validation_samples)
     validation_set.set_image_loader(image_loader).map(validation_preprocessor).batch(args.batch_size)
 
     # train the model
     if args.mode == 'train':
-        model = Model(sample_loader.get_alphabet(), decoder_type)
+        model = Model(datasets_loader.get_alphabet(), decoder_type)
         model.train(train_set, validation_set, early_stopping=args.early_stopping)
 
     # evaluate it on the validation set
     elif args.mode == 'validate':
-        model = Model(sample_loader.get_alphabet(), decoder_type, must_restore=True)
+        model = Model(datasets_loader.get_alphabet(), decoder_type, must_restore=True)
         model.validate(validation_set)
 
     # infer text on test image
     elif args.mode == 'infer':
-        model = Model(sample_loader.get_alphabet(), decoder_type, must_restore=True, dump=args.dump)
+        model = Model(datasets_loader.get_alphabet(), decoder_type, must_restore=True, dump=args.dump)
         model.infer(args.img_file)
-
 
 if __name__ == '__main__':
     main()
