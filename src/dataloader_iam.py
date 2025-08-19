@@ -8,27 +8,12 @@ from dataset_structure import Sample
 from settings import Settings
 
 class DatasetLoader(ABC):
-    @abstractmethod
-    def get_datasets(self) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
-        """Returns the training, validation and test datasets"""
-        pass
+    samples: List[Sample]
+    char_list: List[str]
+    corpus: List[str]
 
-    @abstractmethod
-    def get_char_list(self) -> List[str]:
-        pass
-
-class DataLoaderIAM(DatasetLoader):
-    """
-    Loads data which corresponds to IAM format,
-    see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
-    """
-
-    def __init__(self,
-                 data_dir: Path,
-                 train_split: float = 0.95,
-                 validation_split: float = 0.04) -> None:
+    def __init__(self, data_dir: Path) -> None:
         """Loader for dataset."""
-
         assert data_dir.exists()
 
         self.samples = self._load_samples(data_dir)
@@ -36,21 +21,31 @@ class DataLoaderIAM(DatasetLoader):
         if ' ' not in self.char_list:
             self.char_list = [' '] + self.char_list
 
-        self.train_set, self.validation_set, self.test_set = self._split_dataset(
-            train_split, 
-            validation_split
-        )
-
         self.corpus = [x.gt_text for x in self.samples]
 
         with open(Settings.CORPUS_FILE_PATH, 'w') as f:
             f.write(' '.join(self.corpus))
 
-    def get_char_list(self):
-        return self.char_list
+    def get_datasets(self, train_split: float = 0.95, validation_split: float = 0.04):
+        train_samples, validation_samples, test_samples = self._split_samples(
+            self.samples,
+            train_split, 
+            validation_split
+        )
 
-    def get_datasets(self):
-        return self.train_set, self.validation_set, self.test_set
+        train_set = Dataset(train_samples, drop_remainder=True, shuffle=True)
+        validation_set = Dataset(validation_samples)
+        test_set = Dataset(test_samples)
+
+        return train_set, validation_set, test_set
+
+    @abstractmethod
+    def get_char_list(self) -> List[str]:
+        pass
+
+    @abstractmethod
+    def _load_samples(self, data_dir: str):
+        pass
 
     def _build_char_list(self):
         alphabet = set()
@@ -59,23 +54,28 @@ class DataLoaderIAM(DatasetLoader):
             alphabet = alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
-    def _split_dataset(self, train_split, validation_split) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
+    def _split_samples(self, train_split, validation_split) -> Tuple[List[Sample], List[Sample], List[Sample]]:
         # split into training and validation set: 95% - 4% - 1%
         dataset_size = len(self.samples)
         train_size = int(train_split * dataset_size)
         validation_size = int(validation_split * dataset_size)
 
         train_samples = self.samples[0:train_size]
-        train_set = Dataset(train_samples, drop_remainder=True, shuffle=True)
-
         validation_samples = self.samples[train_size:train_size + validation_size]
-        validation_set = Dataset(validation_samples)
-
         test_samples = self.samples[train_size + validation_size:]
-        test_set = Dataset(test_samples)
 
-        return train_set, validation_set, test_set
+        return train_samples, validation_samples, test_samples
 
+    
+class DataLoaderIAM(DatasetLoader):
+    """
+    Loads data which corresponds to IAM format,
+    see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
+    """
+
+    def get_char_list(self):
+        return self.char_list
+    
     def _load_samples(self, data_dir) -> List[Sample]:
         ground_truths_file = open(data_dir / 'gt/words.txt')
         samples = []
