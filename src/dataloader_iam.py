@@ -23,9 +23,6 @@ class DatasetLoader(ABC):
 
         self.corpus = [x.gt_text for x in self.samples]
 
-        with open(Settings.CORPUS_FILE_PATH, 'w') as f:
-            f.write(' '.join(self.corpus))
-
     def get_datasets(self, train_split: float = 0.95, validation_split: float = 0.04):
         train_samples, validation_samples, test_samples = self._split_samples(
             self.samples,
@@ -41,6 +38,10 @@ class DatasetLoader(ABC):
 
     @abstractmethod
     def get_char_list(self) -> List[str]:
+        pass
+
+    @abstractmethod
+    def get_corpus(self) -> str:
         pass
 
     @abstractmethod
@@ -75,6 +76,12 @@ class DataLoaderIAM(DatasetLoader):
 
     def get_char_list(self):
         return self.char_list
+    
+    def get_corpus(self):
+        with open(Settings.CORPUS_FILE_PATH, 'w') as f:
+            f.write(' '.join(self.corpus))
+            
+        return self.corpus
     
     def _load_samples(self, data_dir) -> List[Sample]:
         ground_truths_file = open(data_dir / 'gt/words.txt')
