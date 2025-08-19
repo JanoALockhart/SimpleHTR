@@ -69,7 +69,7 @@ class DatasetImpl(Dataset):
         """Get next element."""
         batch_range = range(self.curr_idx, min(self.curr_idx + self.batch_size, len(self.samples)))
 
-        imgs = [self.preprocessor.get_img(self.samples[i].file_path) for i in batch_range]
+        imgs = [self.preprocessor.load_image(self.samples[i].file_path) for i in batch_range]
         gt_texts = [self.samples[i].gt_text for i in batch_range]
 
         self.curr_idx += self.batch_size
