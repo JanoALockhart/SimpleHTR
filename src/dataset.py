@@ -22,7 +22,7 @@ class Dataset(ABC):
         pass
 
     @abstractmethod
-    def map(self, image_loader: ImageLoader) -> "Dataset":
+    def set_image_loader(self, image_loader: ImageLoader) -> "Dataset":
         pass
 
     @abstractmethod
@@ -48,11 +48,12 @@ class BaseDataset(Dataset):
         self.drop_remainder = False
         self.must_shuffle = False
         self.curr_idx = 0
-        self.image_loader = BaseImageLoader()
+        self.image_loader = None
         self.preprocessor: Preprocessor = None
 
-    def map(self, image_loader: ImageLoader):
+    def set_image_loader(self, image_loader: ImageLoader) -> Dataset:
         self.image_loader = image_loader
+        return self
 
     def map(self, preprocessor: Preprocessor) -> Dataset:
         self.preprocessor = preprocessor
@@ -76,6 +77,7 @@ class BaseDataset(Dataset):
 
     def get_next(self) -> Batch:
         """Get next element."""
+        assert(self.image_loader != None)
         batch_range = range(self.curr_idx, min(self.curr_idx + self.batch_size, len(self.samples)))
 
         imgs = [self.image_loader.load_image(self.samples[i].file_path) for i in batch_range]

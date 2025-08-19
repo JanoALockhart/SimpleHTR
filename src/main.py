@@ -53,13 +53,13 @@ def main():
     
     train_samples, validation_samples, test_samples = sample_loader.get_sample_sets()
 
-    train_preprocessor = Preprocessor(args.data_dir, data_augmentation=True, line_mode=args.line_mode)
+    train_preprocessor = Preprocessor(data_augmentation=True, line_mode=args.line_mode)
     train_set = Dataset.dataset_from_sample_list(train_samples)
-    train_set.map(image_loader).map(train_preprocessor).batch(args.batch_size, drop_remainder=True).shuffle()
+    train_set.set_image_loader(image_loader).map(train_preprocessor).batch(args.batch_size, drop_remainder=True).shuffle()
 
-    validation_preprocessor = Preprocessor(args.data_dir, line_mode=args.line_mode)
+    validation_preprocessor = Preprocessor(line_mode=args.line_mode)
     validation_set = Dataset.dataset_from_sample_list(validation_samples)
-    validation_set.map(image_loader).map(validation_preprocessor).batch(args.batch_size)
+    validation_set.set_image_loader(image_loader).map(validation_preprocessor).batch(args.batch_size)
 
     # train the model
     if args.mode == 'train':
