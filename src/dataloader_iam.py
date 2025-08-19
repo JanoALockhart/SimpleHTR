@@ -12,11 +12,9 @@ class DatasetLoader(ABC):
     alphabet: List[str]
     corpus: List[str]
 
-    def __init__(self, data_dir: Path) -> None:
+    def __init__(self) -> None:
         """Loader for dataset."""
-        assert data_dir.exists()
-
-        self.samples = self._load_samples(data_dir)
+        self.samples = self._load_samples()
 
         self.alphabet = self._build_alphabet()
         self.corpus = self._build_corpus()
@@ -26,11 +24,7 @@ class DatasetLoader(ABC):
         return ' '.join(corpus_list)
 
     def get_datasets(self, train_split: float = 0.95, validation_split: float = 0.04) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
-        train_samples, validation_samples, test_samples = self._split_samples(
-            self.samples,
-            train_split, 
-            validation_split
-        )
+        train_samples, validation_samples, test_samples = self._split_samples(train_split, validation_split)
 
         train_set = Dataset(train_samples, drop_remainder=True, shuffle=True)
         validation_set = Dataset(validation_samples)
@@ -47,7 +41,7 @@ class DatasetLoader(ABC):
         pass
 
     @abstractmethod
-    def _load_samples(self, data_dir: str):
+    def _load_samples(self):
         pass
 
     def _build_alphabet(self):
@@ -76,6 +70,9 @@ class IAMDataLoader(DatasetLoader):
     Loads data which corresponds to IAM format,
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
     """
+    def __init__(self, data_dir: str):
+        self.data_dir = data_dir
+        super().__init__()
 
     def get_alphabet(self):
         return self.alphabet
@@ -86,7 +83,8 @@ class IAMDataLoader(DatasetLoader):
 
         return self.corpus
     
-    def _load_samples(self, data_dir) -> List[Sample]:
+    def _load_samples(self) -> List[Sample]:
+        data_dir = self.data_dir
         ground_truths_file = open(data_dir / 'gt/words.txt')
         samples = []
         
