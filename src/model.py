@@ -10,11 +10,10 @@ from path import Path
 import numpy as np
 import tensorflow as tf
 
-from dataset import Batch
+from dataset import Batch, Dataset
 from settings import Settings
 from preprocessor import Preprocessor
 from summary_writer import SummaryWriter, EpochSummary
-from dataloader_iam import IAMDataLoader, Dataset
 
 class DecoderType:
     """CTC decoder types."""

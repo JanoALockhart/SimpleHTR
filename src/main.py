@@ -44,8 +44,8 @@ def main():
                        'wordbeamsearch': DecoderType.WordBeamSearch}
     decoder_type = decoder_mapping[args.decoder]
 
-    loader = IAMDataLoader(args.data_dir)
-    train_samples, validation_samples, test_samples = loader.get_sample_sets(train_split=0.95, validation_split=0.04)
+    loader = IAMDataLoader(args.data_dir, train_split=0.95, validation_split=0.04)
+    train_samples, validation_samples, test_samples = loader.get_sample_sets()
 
     train_preprocessor = Preprocessor(args.data_dir, data_augmentation=True, line_mode=args.line_mode)
     train_set = Dataset.dataset_from_sample_list(train_samples)

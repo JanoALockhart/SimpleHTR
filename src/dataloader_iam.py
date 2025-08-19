@@ -22,8 +22,9 @@ class BaseDataLoader(DataLoader):
     alphabet: List[str]
     corpus: List[str]
 
-    def __init__(self, train_split: float = 0.95, validation_split:float = 0.04) -> None:
+    def __init__(self,  data_dir: str, train_split: float = 0.95, validation_split:float = 0.04) -> None:
         """Basic loader for only one dataset from the filesystem"""
+        self.data_dir = data_dir
         self.train_split = train_split
         self.validation_split = validation_split
         self.samples = self._load_samples()
@@ -65,10 +66,6 @@ class IAMDataLoader(BaseDataLoader):
     Loads data which corresponds to IAM format,
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
     """
-    def __init__(self, data_dir: str):
-        self.data_dir = data_dir
-        super().__init__()
-
     def get_alphabet(self):
         return self.alphabet
     
