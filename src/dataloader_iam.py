@@ -19,9 +19,11 @@ class DatasetLoader(ABC):
         self.samples = self._load_samples(data_dir)
 
         self.alphabet = self._build_alphabet()
+        self.corpus = self._build_corpus()
 
+    def _build_corpus(self):
         corpus_list = [x.gt_text for x in self.samples]
-        self.corpus = ' '.join(corpus_list)
+        return ' '.join(corpus_list)
 
     def get_datasets(self, train_split: float = 0.95, validation_split: float = 0.04) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
         train_samples, validation_samples, test_samples = self._split_samples(
