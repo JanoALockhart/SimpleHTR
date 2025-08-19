@@ -7,7 +7,7 @@ import numpy as np
 from dataset_structure import Batch, Sample
 from preprocessor import Preprocessor
 
-class AbstractDataset(ABC):
+class Dataset(ABC):
     @abstractmethod
     def has_next(self) -> bool:
         pass
@@ -21,23 +21,23 @@ class AbstractDataset(ABC):
         pass
 
     @abstractmethod
-    def map(self, preprocessor: Preprocessor) -> "AbstractDataset":
+    def map(self, preprocessor: Preprocessor) -> "Dataset":
         pass
 
     @abstractmethod
-    def batch(self, batch_size: int, drop_remainder: bool = False) -> "AbstractDataset":
+    def batch(self, batch_size: int, drop_remainder: bool = False) -> "Dataset":
         pass
 
     @abstractmethod
-    def shuffle(self) -> "AbstractDataset":
+    def shuffle(self) -> "Dataset":
         pass
 
     @staticmethod
     @abstractmethod
-    def dataset_from_sample_list(sample_list: List[Sample]) -> "AbstractDataset":
+    def dataset_from_sample_list(sample_list: List[Sample]) -> "Dataset":
         pass
 
-class Dataset(AbstractDataset):
+class DatasetImpl(Dataset):
     def __init__(self, samples:List[Sample]):
         self.samples = samples
         self.batch_size = 32
@@ -46,7 +46,7 @@ class Dataset(AbstractDataset):
         self.curr_idx = 0
         self.preprocessor: Preprocessor = None
 
-    def map(self, preprocessor: Preprocessor) -> AbstractDataset:
+    def map(self, preprocessor: Preprocessor) -> Dataset:
         self.preprocessor = preprocessor
         return self
 
@@ -94,6 +94,6 @@ class Dataset(AbstractDataset):
         self.must_shuffle = True
         return self
 
-    def dataset_from_sample_list(sample_list: List[Sample]) -> "AbstractDataset":
-        return Dataset(sample_list)
+    def dataset_from_sample_list(sample_list: List[Sample]) -> "Dataset":
+        return DatasetImpl(sample_list)
     
