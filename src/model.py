@@ -14,7 +14,7 @@ from dataset import Batch
 from settings import Settings
 from preprocessor import Preprocessor
 from summary_writer import SummaryWriter, EpochSummary
-from dataloader_iam import IAMDataLoader, Dataset
+from dataloader_iam import IAMDatasetLoader, Dataset
 
 class DecoderType:
     """CTC decoder types."""

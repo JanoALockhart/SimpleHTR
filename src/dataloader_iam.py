@@ -8,6 +8,19 @@ from dataset_structure import Sample
 from settings import Settings
 
 class DatasetLoader(ABC):
+    @abstractmethod
+    def get_alphabet(self) -> List[str]:
+        pass
+
+    @abstractmethod
+    def get_corpus(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_datasets(self):
+        pass
+
+class BaseDatasetLoader(DatasetLoader):
     samples: List[Sample]
     alphabet: List[str]
     corpus: List[str]
@@ -65,7 +78,7 @@ class DatasetLoader(ABC):
         return train_samples, validation_samples, test_samples
 
     
-class IAMDataLoader(DatasetLoader):
+class IAMDatasetLoader(BaseDatasetLoader):
     """
     Loads data which corresponds to IAM format,
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
