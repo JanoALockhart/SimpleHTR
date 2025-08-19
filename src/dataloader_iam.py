@@ -17,7 +17,7 @@ class DatasetLoader(ABC):
         assert data_dir.exists()
 
         self.samples = self._load_samples(data_dir)
-        
+
         self.alphabet = self._build_alphabet()
         self.corpus = [x.gt_text for x in self.samples]
 
@@ -67,7 +67,7 @@ class DatasetLoader(ABC):
         return train_samples, validation_samples, test_samples
 
     
-class DataLoaderIAM(DatasetLoader):
+class IAMDataLoader(DatasetLoader):
     """
     Loads data which corresponds to IAM format,
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database

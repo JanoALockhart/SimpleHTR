@@ -5,7 +5,7 @@ import random
 import numpy as np
 
 from preprocessor import Preprocessor
-from dataloader_iam import DataLoaderIAM
+from dataloader_iam import IAMDataLoader
 from model import Model, DecoderType
 from settings import Settings
 
@@ -43,7 +43,7 @@ def main():
                        'wordbeamsearch': DecoderType.WordBeamSearch}
     decoder_type = decoder_mapping[args.decoder]
 
-    loader = DataLoaderIAM(args.data_dir)
+    loader = IAMDataLoader(args.data_dir)
     train_set, validation_set, test_set = loader.get_datasets()
 
     train_preprocessor = Preprocessor(args.data_dir, data_augmentation=True, line_mode=args.line_mode)
