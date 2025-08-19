@@ -9,7 +9,7 @@ from settings import Settings
 
 class DatasetLoader(ABC):
     samples: List[Sample]
-    char_list: List[str]
+    alphabet: List[str]
     corpus: List[str]
 
     def __init__(self, data_dir: Path) -> None:
@@ -17,8 +17,8 @@ class DatasetLoader(ABC):
         assert data_dir.exists()
 
         self.samples = self._load_samples(data_dir)
-        self.char_list = self._build_char_list()
-
+        
+        self.alphabet = self._build_alphabet()
         self.corpus = [x.gt_text for x in self.samples]
 
     def get_datasets(self, train_split: float = 0.95, validation_split: float = 0.04):
@@ -46,7 +46,7 @@ class DatasetLoader(ABC):
     def _load_samples(self, data_dir: str):
         pass
 
-    def _build_char_list(self):
+    def _build_alphabet(self):
         alphabet = set()
         alphabet.add(' ')
         for example in self.samples:
@@ -74,7 +74,7 @@ class DataLoaderIAM(DatasetLoader):
     """
 
     def get_char_list(self):
-        return self.char_list
+        return self.alphabet
     
     def get_corpus(self):
         with open(Settings.CORPUS_FILE_PATH, 'w') as f:
