@@ -25,18 +25,19 @@ class AbstractDataset(ABC):
         pass
 
     @abstractmethod
-    def batch(self, batch_size: int) -> "AbstractDataset":
+    def batch(self, batch_size: int, drop_remainder: bool = False) -> "AbstractDataset":
+        pass
+
+    @abstractmethod
+    def shuffle(self) -> "AbstractDataset":
         pass
 
 class Dataset(AbstractDataset):
-    def __init__(self, 
-                 samples:List[Sample], 
-                 drop_remainder:bool = False, 
-                 shuffle:bool = False):
+    def __init__(self, samples:List[Sample]):
         self.samples = samples
         self.batch_size = 32
-        self.drop_remainder = drop_remainder
-        self.shuffle = shuffle
+        self.drop_remainder = False
+        self.must_shuffle = False
         self.curr_idx = 0
         self.preprocessor: Preprocessor = None
 
@@ -75,12 +76,17 @@ class Dataset(AbstractDataset):
         return batch
     
     def reset_iterator(self):
-        if self.shuffle:
+        if self.must_shuffle:
             random.shuffle(self.samples)
         self.curr_idx = 0
 
-    def batch(self, batch_size: int):
+    def batch(self, batch_size: int, drop_remainder:bool = False):
         self.batch_size = batch_size
+        self.drop_remainder = drop_remainder
+        return self
+    
+    def shuffle(self):
+        self.must_shuffle = True
         return self
 
         
