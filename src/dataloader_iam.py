@@ -21,7 +21,7 @@ class DatasetLoader(ABC):
         self.alphabet = self._build_alphabet()
         self.corpus = [x.gt_text for x in self.samples]
 
-    def get_datasets(self, train_split: float = 0.95, validation_split: float = 0.04):
+    def get_datasets(self, train_split: float = 0.95, validation_split: float = 0.04) -> Tuple[AbstractDataset, AbstractDataset, AbstractDataset]:
         train_samples, validation_samples, test_samples = self._split_samples(
             self.samples,
             train_split, 
