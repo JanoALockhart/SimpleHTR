@@ -5,7 +5,7 @@ import random
 import numpy as np
 
 from dataset import Dataset, BaseDataset
-from image_loader import LMDBImageLoader
+from image_loader import BaseImageLoader, LMDBImageLoader
 from preprocessor import Preprocessor
 from dataloader_iam import IAMDataLoader
 from model import Model, DecoderType
@@ -45,9 +45,13 @@ def main():
                        'wordbeamsearch': DecoderType.WordBeamSearch}
     decoder_type = decoder_mapping[args.decoder]
 
-    loader = IAMDataLoader(args.data_dir, train_split=0.95, validation_split=0.04)
-    image_loader = LMDBImageLoader(args.data_dir)
-    train_samples, validation_samples, test_samples = loader.get_sample_sets()
+    sample_loader = IAMDataLoader(args.data_dir, train_split=0.95, validation_split=0.04)
+    
+    image_loader = BaseImageLoader()
+    if args.fast:
+        image_loader = LMDBImageLoader(args.data_dir)
+    
+    train_samples, validation_samples, test_samples = sample_loader.get_sample_sets()
 
     train_preprocessor = Preprocessor(args.data_dir, data_augmentation=True, line_mode=args.line_mode)
     train_set = Dataset.dataset_from_sample_list(train_samples)
@@ -59,17 +63,17 @@ def main():
 
     # train the model
     if args.mode == 'train':
-        model = Model(loader.get_alphabet(), decoder_type)
+        model = Model(sample_loader.get_alphabet(), decoder_type)
         model.train(train_set, validation_set, early_stopping=args.early_stopping)
 
     # evaluate it on the validation set
     elif args.mode == 'validate':
-        model = Model(loader.get_alphabet(), decoder_type, must_restore=True)
+        model = Model(sample_loader.get_alphabet(), decoder_type, must_restore=True)
         model.validate(validation_set)
 
     # infer text on test image
     elif args.mode == 'infer':
-        model = Model(loader.get_alphabet(), decoder_type, must_restore=True, dump=args.dump)
+        model = Model(sample_loader.get_alphabet(), decoder_type, must_restore=True, dump=args.dump)
         model.infer(args.img_file)
 
 
