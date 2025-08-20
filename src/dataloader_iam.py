@@ -56,7 +56,7 @@ class BaseDatasetLoader(DatasetLoader):
             alphabet = alphabet.union(unique_letters)
         return sorted(list(alphabet))   
 
-    def split_samples(self) -> Tuple[List[Sample], List[Sample], List[Sample]]:
+    def _split_samples(self) -> Tuple[List[Sample], List[Sample], List[Sample]]:
         dataset_size = len(self.samples)
         train_size = int(self.train_split * dataset_size)
         validation_size = int(self.validation_split * dataset_size)
@@ -68,11 +68,13 @@ class BaseDatasetLoader(DatasetLoader):
         return train_samples, validation_samples, test_samples
 
     def get_raw_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
-        train_samples, validation_samples, test_samples = self.split_samples()
+        train_samples, validation_samples, test_samples = self._split_samples()
+
         train_set = Dataset.dataset_from_sample_list(train_samples)
         validation_set = Dataset.dataset_from_sample_list(validation_samples)
         test_set = Dataset.dataset_from_sample_list(test_samples)
-        return train_set,validation_set
+        
+        return train_set, validation_set, test_set
 
     
 class IAMDataLoader(BaseDatasetLoader):
