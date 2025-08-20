@@ -45,7 +45,15 @@ def main():
                        'wordbeamsearch': DecoderType.WordBeamSearch}
     decoder_type = decoder_mapping[args.decoder]
 
-    datasets_loader = IAMDataLoader(args.data_dir, args.batch_size, args.line_mode, args.fast, train_split=0.95, validation_split=0.04)
+    datasets_loader = IAMDataLoader(
+        args.data_dir, 
+        args.batch_size, 
+        args.line_mode, 
+        args.fast, 
+        train_split=0.95, 
+        validation_split=0.04
+    )
+    
     train_set, validation_set, test_set = datasets_loader.get_configured_datasets()
     # TODO Evaluate with the test set
 

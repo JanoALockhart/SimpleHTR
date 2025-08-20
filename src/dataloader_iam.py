@@ -89,11 +89,13 @@ class IAMDataLoader(BaseDatasetLoader):
                  fast: bool,
                  train_split: float = 0.95, 
                  validation_split: float = 0.04,
+                 data_augmentation: bool = True
                  ):
         super().__init__(data_dir, train_split, validation_split)
         self.batch_size = batch_size
         self.line_mode = line_mode
         self.fast = fast
+        self.data_augmentation = data_augmentation
 
     def get_alphabet(self):
         return self.alphabet
@@ -147,7 +149,7 @@ class IAMDataLoader(BaseDatasetLoader):
         
         train_set, validation_set, test_set = super().get_raw_datasets()
 
-        train_preprocessor = Preprocessor(data_augmentation=True, line_mode=self.line_mode)
+        train_preprocessor = Preprocessor(data_augmentation=self.data_augmentation, line_mode=self.line_mode)
         train_set.set_image_loader(image_loader).map(train_preprocessor).batch(self.batch_size, drop_remainder=True).shuffle()
 
         not_training_preprocessor = Preprocessor(line_mode=self.line_mode)
