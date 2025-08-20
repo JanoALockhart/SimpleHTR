@@ -73,7 +73,7 @@ class BaseDatasetLoader(DatasetLoader):
         train_set = Dataset.dataset_from_sample_list(train_samples)
         validation_set = Dataset.dataset_from_sample_list(validation_samples)
         test_set = Dataset.dataset_from_sample_list(test_samples)
-        
+
         return train_set, validation_set, test_set
 
     
@@ -107,7 +107,7 @@ class IAMDataLoader(BaseDatasetLoader):
     
     def _load_samples(self) -> List[Sample]:
         data_dir = self.data_dir
-        ground_truths_file = open(data_dir / 'gt/words.txt')
+        ground_truths_file = open(data_dir / 'ascii/words.txt')
         samples = []
         
         for line in ground_truths_file:
@@ -137,7 +137,7 @@ class IAMDataLoader(BaseDatasetLoader):
         fist_subdir_name = file_name_split[0]
         second_subdir_name = f'{file_name_split[0]}-{file_name_split[1]}'
         file_name = line_split[0] + '.png'
-        file_path = data_dir / 'img' / fist_subdir_name / second_subdir_name / file_name
+        file_path = data_dir / 'words' / fist_subdir_name / second_subdir_name / file_name
         return file_path   
 
     def get_configured_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
