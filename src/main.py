@@ -51,9 +51,10 @@ def main():
         args.line_mode, 
         args.fast, 
         train_split=0.95, 
-        validation_split=0.04
+        validation_split=0.04,
+        data_augmentation=False
     )
-    
+
     train_set, validation_set, test_set = datasets_loader.get_configured_datasets()
     # TODO Evaluate with the test set
 
