@@ -309,7 +309,8 @@ class Model:
     def train(self,
             train_set: Dataset,
             validation_set: Dataset,
-            early_stopping: int = 25) -> None:
+            early_stopping: int = 25,
+            max_epoch: int = 42) -> None:
         """Trains NN."""
         epoch = 0  # number of training epochs since start
         summary_writer = SummaryWriter(Settings.SUMMARY_FILE_PATH)
@@ -322,7 +323,9 @@ class Model:
         while True:
             epoch += 1
             print('Epoch:', epoch)
-
+            if epoch > max_epoch:
+                print(f'Max epoch {max_epoch} reached. Trainig stopped')
+                break
 
             # train
             print('Train NN')
