@@ -45,19 +45,9 @@ def main():
                        'wordbeamsearch': DecoderType.WordBeamSearch}
     decoder_type = decoder_mapping[args.decoder]
 
-    datasets_loader = IAMDataLoader(args.data_dir, train_split=0.95, validation_split=0.04)
-    
-    image_loader = BaseImageLoader()
-    if args.fast:
-        image_loader = LMDBImageLoader(args.data_dir)
-    
-    train_set, validation_set, test_set = datasets_loader.get_datasets()
-
-    train_preprocessor = Preprocessor(data_augmentation=True, line_mode=args.line_mode)
-    train_set.set_image_loader(image_loader).map(train_preprocessor).batch(args.batch_size, drop_remainder=True).shuffle()
-
-    validation_preprocessor = Preprocessor(line_mode=args.line_mode)
-    validation_set.set_image_loader(image_loader).map(validation_preprocessor).batch(args.batch_size)
+    datasets_loader = IAMDataLoader(args.data_dir, args.batch_size, args.line_mode, args.fast, train_split=0.95, validation_split=0.04)
+    train_set, validation_set, test_set = datasets_loader.get_configured_datasets()
+    # TODO Evaluate with the test set
 
     # train the model
     if args.mode == 'train':

@@ -3,6 +3,8 @@ from typing import List, Tuple
 
 from dataset import Dataset
 from dataset_structure import Sample
+from image_loader import BaseImageLoader, LMDBImageLoader
+from preprocessor import Preprocessor
 from settings import Settings
 
 class DatasetLoader(ABC):
@@ -15,7 +17,11 @@ class DatasetLoader(ABC):
         pass
 
     @abstractmethod
-    def get_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
+    def get_raw_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
+        pass
+
+    @abstractmethod
+    def get_configured_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
         pass
 
 class BaseDatasetLoader(DatasetLoader):
@@ -61,7 +67,7 @@ class BaseDatasetLoader(DatasetLoader):
 
         return train_samples, validation_samples, test_samples
 
-    def get_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
+    def get_raw_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
         train_samples, validation_samples, test_samples = self.split_samples()
         train_set = Dataset.dataset_from_sample_list(train_samples)
         validation_set = Dataset.dataset_from_sample_list(validation_samples)
@@ -74,6 +80,19 @@ class IAMDataLoader(BaseDatasetLoader):
     Loads data which corresponds to IAM format,
     see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database
     """
+    def __init__(self, 
+                 data_dir: str, 
+                 batch_size: int,
+                 line_mode: bool,
+                 fast: bool,
+                 train_split: float = 0.95, 
+                 validation_split: float = 0.04,
+                 ):
+        super().__init__(data_dir, train_split, validation_split)
+        self.batch_size = batch_size
+        self.line_mode = line_mode
+        self.fast = fast
+
     def get_alphabet(self):
         return self.alphabet
     
@@ -118,3 +137,19 @@ class IAMDataLoader(BaseDatasetLoader):
         file_name = line_split[0] + '.png'
         file_path = data_dir / 'img' / fist_subdir_name / second_subdir_name / file_name
         return file_path   
+
+    def get_configured_datasets(self) -> Tuple[Dataset, Dataset, Dataset]:
+        image_loader = BaseImageLoader()
+        if self.fast:
+            image_loader = LMDBImageLoader(self.data_dir)
+        
+        train_set, validation_set, test_set = super().get_raw_datasets()
+
+        train_preprocessor = Preprocessor(data_augmentation=True, line_mode=self.line_mode)
+        train_set.set_image_loader(image_loader).map(train_preprocessor).batch(self.batch_size, drop_remainder=True).shuffle()
+
+        not_training_preprocessor = Preprocessor(line_mode=self.line_mode)
+        validation_set.set_image_loader(image_loader).map(not_training_preprocessor).batch(self.batch_size)
+        test_set.set_image_loader(image_loader).map(not_training_preprocessor).batch(self.batch_size)
+        
+        return train_set, validation_set, test_set
