@@ -52,7 +52,7 @@ def main():
         args.fast, 
         train_split=0.95, 
         validation_split=0.04,
-        data_augmentation=False
+        data_augmentation=True
     )
 
     train_set, validation_set, test_set = datasets_loader.get_configured_datasets()
