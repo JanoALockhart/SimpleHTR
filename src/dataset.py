@@ -22,6 +22,10 @@ class Dataset(ABC):
         pass
 
     @abstractmethod
+    def reset_iterator(self) -> None:
+        pass
+
+    @abstractmethod
     def set_image_loader(self, image_loader: ImageLoader) -> "Dataset":
         pass
 
@@ -67,7 +71,10 @@ class EmptyDataset(Dataset):
     
     def shuffle(self):
         raise Exception("Empty Dataset")
-
+    
+    def reset_iterator(self):
+        raise Exception("Empty Dataset")
+    
 
 class BaseDataset(Dataset):
     def __init__(self, samples:List[Sample]):
