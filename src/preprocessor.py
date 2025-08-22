@@ -28,7 +28,7 @@ class Preprocessor:
         # when padding is on, we need dynamic width enabled
         assert not (padding > 0 and not dynamic_width)
 
-        self.target_img_size = get_img_size()
+        self.target_img_size = get_img_size(line_mode)
         self.padding = padding
         self.dynamic_width = dynamic_width
         self.data_augmentation = data_augmentation
