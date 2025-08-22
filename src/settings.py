@@ -6,3 +6,5 @@ class Settings:
     MODEL_DIR = '../model/'
     DUMP_DIR = '../dump/'
     SEED = 23
+
+    JPSD_SMALL_PATH = "C:\\Users\\janoa\\Documents\\UNS\\TRABAJO FINAL\\Datasets\\JPSD-small"
