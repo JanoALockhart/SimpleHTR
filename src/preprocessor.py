@@ -282,3 +282,16 @@ class Preprocessor:
         res_gt_texts = [self._truncate_label(gt_text, max_text_len) for gt_text in batch.gt_texts]
         return Batch(res_imgs, res_gt_texts, batch.batch_size)
 
+
+class ColorImagePreprocessor(Preprocessor):
+    def __init__(self, padding = 0, dynamic_width = False, data_augmentation = False, line_mode = False):
+        super().__init__(padding, dynamic_width, data_augmentation, line_mode)
+        self.target_img_size = get_img_size()
+
+    def process_img(self, img):
+        img = self._thresholding(img)
+        return super().process_img(img)
+
+    def _thresholding(self, img):
+        img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 31, 10)
+        return img
