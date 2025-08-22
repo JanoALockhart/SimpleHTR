@@ -119,22 +119,22 @@ class PreprocessorTest():
         plt.show()
 
 def main():
-    preprocessor = Preprocessor((256, 32), data_augmentation=True)
+    preprocessor = Preprocessor(data_augmentation=True, line_mode=True)
     test = PreprocessorTest(preprocessor)
     #test = PreprocessorTest(preprocessor, '../data/word.png')
     
     test.test_random_preprocess_image()
-    test.test_gaussian_blur()
-    test.test_dilate()
-    test.test_erode()
+    #test.test_gaussian_blur()
+    #test.test_dilate()
+    #test.test_erode()
     test.test_random_transformation()
     test.test_random_transformation_scaling_multiplier(scaling_multiplier=0.75)
     test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
-    test.test_darken()
-    test.test_noise()
-    test.test_invert()
-    test.test_transpose()
-    test.test_normalize()
+    #test.test_darken()
+    #test.test_noise()
+    #test.test_invert()
+    #test.test_transpose()
+    #test.test_normalize()
 
 if __name__ == '__main__':
     main()
