@@ -1,18 +1,22 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-from preprocessor import Preprocessor
+from preprocessor import Preprocessor, ColorImagePreprocessor
 
 class PreprocessorTest():
     preprocessor: Preprocessor
     img_path: str
 
-    def __init__(self, preprocessor, img_path = '../data/line.png'):
+    def __init__(self, preprocessor: Preprocessor, img_path = '../data/line.png'):
         self.preprocessor = preprocessor
         self.img_path = img_path
 
     def _open_image(self) -> np.ndarray:
         return cv2.imread(self.img_path, cv2.IMREAD_GRAYSCALE)
+    
+    def show_original_image(self):
+        original_img = self._open_image()
+        self._visualize(original_img, original_img)
 
     def test_random_preprocess_image(self):
         original_img = self._open_image()
@@ -118,23 +122,43 @@ class PreprocessorTest():
 
         plt.show()
 
+class ColorImagePreprocessorTest(PreprocessorTest):
+    def __init__(self, preprocessor: ColorImagePreprocessor, img_path='../data/line.png'):
+        super().__init__(preprocessor, img_path)
+        self.preprocessor2 = preprocessor
+
+    def test_thresholding(self):
+        original_img = super()._open_image()
+
+        aug_img = self.preprocessor2._thresholding(original_img)
+
+        assert np.min(aug_img) == 0 and np.max(aug_img) == 255
+        self._visualize(original_img, aug_img, "Threshold")
+
 def main():
     preprocessor = Preprocessor(data_augmentation=True, line_mode=True)
-    test = PreprocessorTest(preprocessor)
-    #test = PreprocessorTest(preprocessor, '../data/word.png')
-    
-    test.test_random_preprocess_image()
+    #img_path = '../data/word.png'
+    img_path = "C:\\Users\\janoa\\Documents\\UNS\\TRABAJO FINAL\\Datasets\\JPSD-small\\lines\\n001-00-01.jpg"
+    test = PreprocessorTest(preprocessor, img_path)
+
+    #test.test_random_preprocess_image()
     #test.test_gaussian_blur()
     #test.test_dilate()
     #test.test_erode()
-    test.test_random_transformation()
-    test.test_random_transformation_scaling_multiplier(scaling_multiplier=0.75)
-    test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
+    #test.test_random_transformation()
+    #test.test_random_transformation_scaling_multiplier(scaling_multiplier=0.75)
+    #test.test_random_transformation_scaling_multiplier(scaling_multiplier=1.05)
     #test.test_darken()
     #test.test_noise()
     #test.test_invert()
     #test.test_transpose()
     #test.test_normalize()
+
+    preprocessor = ColorImagePreprocessor(line_mode=True)
+    test = ColorImagePreprocessorTest(preprocessor, img_path)
+
+    test.test_thresholding()
+
 
 if __name__ == '__main__':
     main()
