@@ -44,6 +44,12 @@ class BaseDatasetLoader(DatasetLoader):
         """Override this method according to the dataset file structure and the ground truth file format"""
         pass
 
+    def get_alphabet(self):
+        return self.alphabet
+    
+    def get_corpus(self):
+        return self.corpus
+
     def _build_corpus(self):
         corpus_list = [x.gt_text for x in self.samples]
         return ' '.join(corpus_list)
@@ -164,7 +170,7 @@ class JPSDSmallTestSet(BaseDatasetLoader):
         super().__init__(data_dir, 0.0, 0.0)
     
     def _load_samples(self) -> List[Sample]:
-        groundtruths_file = open(self.data_dir / 'lines/lines.txt')
+        groundtruths_file = open(self.data_dir + "/lines/lines.txt")
         samples = []
 
         for line in groundtruths_file:
@@ -174,9 +180,19 @@ class JPSDSmallTestSet(BaseDatasetLoader):
                 file_name = line_split[0]
                 file_path = self.data_dir + file_name
                 groundtruth_text = line_split[1].replace("|"," ")
-                samples.append(file_path, groundtruth_text)
+                samples.append(Sample(groundtruth_text, file_path))
 
         return samples
     
     def _ignore_line(self, line) -> bool:
-        return line[0] == '#'
+        return not line or line[0] == '#'
+    
+    def get_configured_datasets(self):
+        image_loader = BaseImageLoader()
+
+        _, _, test_set = super().get_raw_datasets()
+        test_set.set_image_loader(image_loader).map(Preprocessor()).batch(1)
+
+        empty_dataset = Dataset.dataset_from_sample_list([])
+
+        return empty_dataset, empty_dataset, test_set
