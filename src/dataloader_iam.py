@@ -157,3 +157,26 @@ class IAMDataLoader(BaseDatasetLoader):
         test_set.set_image_loader(image_loader).map(not_training_preprocessor).batch(self.batch_size)
         
         return train_set, validation_set, test_set
+    
+class JPSDSmallTestSet(BaseDatasetLoader):
+
+    def __init__(self, data_dir):
+        super().__init__(data_dir, 0.0, 0.0)
+    
+    def _load_samples(self) -> List[Sample]:
+        groundtruths_file = open(self.data_dir / 'lines/lines.txt')
+        samples = []
+
+        for line in groundtruths_file:
+            line = line.strip()
+            if not self._ignore_line(line):
+                line_split = line.split(' ')
+                file_name = line_split[0]
+                file_path = self.data_dir + file_name
+                groundtruth_text = line_split[1].replace("|"," ")
+                samples.append(file_path, groundtruth_text)
+
+        return samples
+    
+    def _ignore_line(self, line) -> bool:
+        return line[0] == '#'
