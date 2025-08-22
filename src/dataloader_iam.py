@@ -4,7 +4,7 @@ from typing import List, Tuple
 from dataset import Dataset
 from dataset_structure import Sample
 from image_loader import BaseImageLoader, LMDBImageLoader
-from preprocessor import Preprocessor
+from preprocessor import Preprocessor, ColorImagePreprocessor
 from settings import Settings
 
 class DatasetLoader(ABC):
@@ -170,7 +170,8 @@ class JPSDSmallTestSet(BaseDatasetLoader):
         super().__init__(data_dir, 0.0, 0.0)
     
     def _load_samples(self) -> List[Sample]:
-        groundtruths_file = open(self.data_dir + "/lines/lines.txt")
+        samples_folder = self.data_dir + '/lines/'
+        groundtruths_file = open(samples_folder + "lines.txt")
         samples = []
 
         for line in groundtruths_file:
@@ -178,7 +179,7 @@ class JPSDSmallTestSet(BaseDatasetLoader):
             if not self._ignore_line(line):
                 line_split = line.split(' ')
                 file_name = line_split[0]
-                file_path = self.data_dir + file_name
+                file_path = samples_folder + file_name
                 groundtruth_text = line_split[1].replace("|"," ")
                 samples.append(Sample(groundtruth_text, file_path))
 
@@ -191,7 +192,7 @@ class JPSDSmallTestSet(BaseDatasetLoader):
         image_loader = BaseImageLoader()
 
         _, _, test_set = super().get_raw_datasets()
-        test_set.set_image_loader(image_loader).map(Preprocessor()).batch(1)
+        test_set.set_image_loader(image_loader).map(ColorImagePreprocessor()).batch(1)
 
         empty_dataset = Dataset.dataset_from_sample_list([])
 
