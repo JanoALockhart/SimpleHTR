@@ -4,10 +4,7 @@ import tensorflow as tf
 import random
 import numpy as np
 
-from dataset import Dataset, BaseDataset
-from image_loader import BaseImageLoader, LMDBImageLoader
-from preprocessor import Preprocessor
-from dataloader_iam import IAMDataLoader
+from dataloader_iam import IAMDataLoader, JPSDSmallTestSet
 from model import Model, DecoderType
 from settings import Settings
 
@@ -65,8 +62,9 @@ def main():
 
     # evaluate it on the validation set
     elif args.mode == 'validate':
+        _, _, evaluation_set = JPSDSmallTestSet(Settings.JPSD_SMALL_PATH).get_configured_datasets()
         model = Model(datasets_loader.get_alphabet(), decoder_type, must_restore=True)
-        model.validate(validation_set)
+        model.validate(evaluation_set)
 
     # infer text on test image
     elif args.mode == 'infer':
