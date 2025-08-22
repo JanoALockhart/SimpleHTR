@@ -39,7 +39,35 @@ class Dataset(ABC):
 
     @staticmethod
     def dataset_from_sample_list(sample_list: List[Sample]) -> "Dataset":
-        return BaseDataset(sample_list)
+        if len(sample_list) == 0:
+            dataset = EmptyDataset()
+        else:
+            dataset = BaseDataset(sample_list)
+
+        return dataset
+
+class EmptyDataset(Dataset):
+    def has_next(self):
+        return False
+    
+    def get_next(self):
+        raise Exception("Empty Dataset")    
+
+    def get_iterator_info(self):
+        return "Empty Dataset"
+    
+    def set_image_loader(self, image_loader):
+        raise Exception("Empty Dataset")
+
+    def map(self, preprocessor):
+        raise Exception("Empty Dataset")
+    
+    def batch(self, batch_size, drop_remainder = False):
+        raise Exception("Empty Dataset")
+    
+    def shuffle(self):
+        raise Exception("Empty Dataset")
+
 
 class BaseDataset(Dataset):
     def __init__(self, samples:List[Sample]):
