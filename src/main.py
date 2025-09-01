@@ -49,11 +49,10 @@ def main():
         args.fast, 
         train_split=0.95, 
         validation_split=0.04,
-        data_augmentation=True
+        data_augmentation=False
     )
 
     train_set, validation_set, test_set = datasets_loader.get_configured_datasets()
-    # TODO Evaluate with the test set
 
     # train the model
     if args.mode == 'train':
@@ -62,9 +61,8 @@ def main():
 
     # evaluate it on the validation set
     elif args.mode == 'validate':
-        _, _, evaluation_set = JPSDSmallTestSet(Settings.JPSD_SMALL_PATH).get_configured_datasets()
         model = Model(datasets_loader.get_alphabet(), decoder_type, must_restore=True)
-        model.validate(evaluation_set)
+        model.validate(test_set)
 
     # infer text on test image
     elif args.mode == 'infer':
