@@ -379,6 +379,8 @@ class Model:
         validation_set.reset_iterator()
         num_char_err = 0
         num_char_total = 0
+        num_word_err = 0
+        num_word_total = 0
         num_phrase_ok = 0
         num_phrase_total = 0
         while validation_set.has_next():
@@ -391,17 +393,29 @@ class Model:
             for i in range(len(recognized)):
                 num_phrase_ok += 1 if batch.gt_texts[i] == recognized[i] else 0
                 num_phrase_total += 1
-                dist = editdistance.eval(recognized[i], batch.gt_texts[i])
-                num_char_err += dist
+
+                ground_truth_words = batch.gt_texts[i].split(' ')
+                recognized_words = recognized[i].split(' ')
+                word_dist = editdistance.eval(ground_truth_words, recognized_words)
+                num_word_err += word_dist
+                num_word_total += len(ground_truth_words)
+
+                char_dist = editdistance.eval(recognized[i], batch.gt_texts[i])
+                num_char_err += char_dist
                 num_char_total += len(batch.gt_texts[i])
-                print('[C_OK]' if dist == 0 else f'[C_ERR:{dist}]',
+                
+                print('[C_OK]' if char_dist == 0 else f'[C_ERR:{char_dist}]',
+                      '[W_OK]' if word_dist == 0 else f'[W_ERR:{word_dist}]',
                       '[P_OK]' if batch.gt_texts[i] == recognized[i] else '[P_ERR]',
                       f"{batch.gt_texts[i]} -> {recognized[i]}")
 
         # print validation result
         char_error_rate = num_char_err / num_char_total
+        word_error_rate = num_word_err / num_word_total
         phrase_accuracy = num_phrase_ok / num_phrase_total
-        print(f'Character error rate: {char_error_rate * 100.0}%. Phrase accuracy: {phrase_accuracy * 100.0}%.')
+        print(f'Character error rate: {char_error_rate * 100.0}%.')
+        print(f'Word error rate: {word_error_rate * 100.0}%')
+        print(f'Phrase accuracy: {phrase_accuracy * 100.0}%.')
         return char_error_rate, phrase_accuracy
 
 
