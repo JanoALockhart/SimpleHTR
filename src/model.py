@@ -276,7 +276,7 @@ class Model:
 
         # evaluate model
         eval_res = self.sess.run(eval_list, feed_dict)
-        loss = eval_res[2]
+        loss = eval_res[2] if self.dump or calc_probability else eval_res[1]
 
         # TF decoders: decoding already done in TF graph
         if self.decoder_type != DecoderType.WordBeamSearch:
@@ -420,6 +420,7 @@ class Model:
         print(f'Character error rate: {char_error_rate * 100.0}%.')
         print(f'Word error rate: {word_error_rate * 100.0}%')
         print(f'Phrase accuracy: {phrase_accuracy * 100.0}%.')
+        print(f'Loss: {val_loss}')
         return char_error_rate, word_error_rate, phrase_accuracy, val_loss
 
 
