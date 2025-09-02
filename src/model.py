@@ -395,6 +395,7 @@ class Model:
                 num_char_err += dist
                 num_char_total += len(batch.gt_texts[i])
                 print('[C_OK]' if dist == 0 else f'[C_ERR:{dist}]',
+                      '[P_OK]' if batch.gt_texts[i] == recognized[i] else '[P_ERR]',
                       f"{batch.gt_texts[i]} -> {recognized[i]}")
 
         # print validation result
