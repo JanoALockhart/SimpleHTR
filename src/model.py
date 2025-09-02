@@ -337,18 +337,18 @@ class Model:
                 loss = self.train_batch(batch)
                 print(f'Epoch: {epoch} Batch: {iter_info[0]}/{iter_info[1]} Loss: {loss}')
                 train_loss_in_epoch.append(loss)
-                # calculate training_CER and training_Word_acc
+                # calculate training_CER and training_phrase_acc
 
             end_time = time.time()
             # validate
             # calculate validation loss
-            val_CER, val_word_acc = self.validate(validation_set)
+            val_CER, val_phrase_acc = self.validate(validation_set)
 
             # write summary
             epoch_summary = EpochSummary(
                 epoch = epoch,
                 char_error_rate = val_CER,
-                word_accuracies = val_word_acc,
+                phrase_accuracies = val_phrase_acc,
                 average_train_loss = sum(train_loss_in_epoch) / len(train_loss_in_epoch),
                 time_to_train_epoch = end_time-start_time
             )
@@ -379,8 +379,8 @@ class Model:
         validation_set.reset_iterator()
         num_char_err = 0
         num_char_total = 0
-        num_word_ok = 0
-        num_word_total = 0
+        num_phrase_ok = 0
+        num_phrase_total = 0
         while validation_set.has_next():
             iter_info = validation_set.get_iterator_info()
             print(f'Batch: {iter_info[0]} / {iter_info[1]}')
@@ -389,19 +389,19 @@ class Model:
 
             print('Ground truth -> Recognized')
             for i in range(len(recognized)):
-                num_word_ok += 1 if batch.gt_texts[i] == recognized[i] else 0
-                num_word_total += 1
+                num_phrase_ok += 1 if batch.gt_texts[i] == recognized[i] else 0
+                num_phrase_total += 1
                 dist = editdistance.eval(recognized[i], batch.gt_texts[i])
                 num_char_err += dist
                 num_char_total += len(batch.gt_texts[i])
-                print('[OK]' if dist == 0 else '[ERR:%d]' % dist, '"' + batch.gt_texts[i] + '"', '->',
-                    '"' + recognized[i] + '"')
+                print('[C_OK]' if dist == 0 else f'[C_ERR:{dist}]',
+                      f"{batch.gt_texts[i]} -> {recognized[i]}")
 
         # print validation result
         char_error_rate = num_char_err / num_char_total
-        word_accuracy = num_word_ok / num_word_total
-        print(f'Character error rate: {char_error_rate * 100.0}%. Word accuracy: {word_accuracy * 100.0}%.')
-        return char_error_rate, word_accuracy
+        phrase_accuracy = num_phrase_ok / num_phrase_total
+        print(f'Character error rate: {char_error_rate * 100.0}%. Phrase accuracy: {phrase_accuracy * 100.0}%.')
+        return char_error_rate, phrase_accuracy
 
 
     def infer(self, fn_img: Path) -> None:
