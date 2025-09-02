@@ -256,7 +256,7 @@ class Model:
 
         # put tensors to be evaluated into list
         eval_list = []
-
+        
         if self.decoder_type == DecoderType.WordBeamSearch:
             eval_list.append(self.wbs_input)
         else:
@@ -265,15 +265,18 @@ class Model:
         if self.dump or calc_probability:
             eval_list.append(self.ctc_in_3d_tbc)
 
+        eval_list.append(self.loss)
+
         # sequence length depends on input image size (model downsizes width by 4)
         max_text_len = batch.imgs[0].shape[0] // 4
 
         # dict containing all tensor fed into the model
-        feed_dict = {self.input_imgs: batch.imgs, self.seq_len: [max_text_len] * num_batch_elements,
-                     self.is_train: False}
+        feed_dict = {self.input_imgs: batch.imgs, self.gt_texts: self.to_sparse(batch.gt_texts), 
+                     self.seq_len: [max_text_len] * num_batch_elements, self.is_train: False}
 
         # evaluate model
         eval_res = self.sess.run(eval_list, feed_dict)
+        loss = eval_res[2]
 
         # TF decoders: decoding already done in TF graph
         if self.decoder_type != DecoderType.WordBeamSearch:
@@ -300,7 +303,7 @@ class Model:
         if self.dump:
             self.dump_nn_output(eval_res[1])
 
-        return texts, probs
+        return texts, probs, loss
 
     def save(self) -> None:
         """Save model to file."""
@@ -387,7 +390,7 @@ class Model:
             iter_info = validation_set.get_iterator_info()
             print(f'Batch: {iter_info[0]} / {iter_info[1]}')
             batch = validation_set.get_next()
-            recognized, _ = self.infer_batch(batch)
+            recognized, _, val_loss = self.infer_batch(batch)
 
             print('Ground truth -> Recognized')
             for i in range(len(recognized)):
@@ -422,6 +425,6 @@ class Model:
         img = preprocessor.process_img(img)
 
         batch = Batch([img], None, 1)
-        recognized, probability = self.infer_batch(batch, True)
+        recognized, probability, _ = self.infer_batch(batch, True)
         print(f'Recognized: "{recognized[0]}"')
         print(f'Probability: {probability[0]}')
