@@ -11,6 +11,7 @@ import numpy as np
 import tensorflow as tf
 
 from dataset import Batch, Dataset
+from metric import CharacterErrorRate, PhraseAccuracy, WordErrorRate
 from settings import Settings
 from preprocessor import Preprocessor
 from summary_writer import SummaryWriter, EpochSummary
@@ -378,12 +379,10 @@ class Model:
         """Validates NN."""
         print('Validate NN')
         validation_set.reset_iterator()
-        num_char_err = 0
-        num_char_total = 0
-        num_word_err = 0
-        num_word_total = 0
-        num_phrase_ok = 0
-        num_phrase_total = 0
+        cer_metric = CharacterErrorRate()
+        wer_metric = WordErrorRate()
+        phrase_acc_metric = PhraseAccuracy()
+        
         while validation_set.has_next():
             iter_info = validation_set.get_iterator_info()
             print(f'Batch: {iter_info[0]} / {iter_info[1]}')
@@ -392,28 +391,22 @@ class Model:
 
             print('Ground truth -> Recognized')
             for i in range(len(recognized)):
-                num_phrase_ok += 1 if batch.gt_texts[i] == recognized[i] else 0
-                num_phrase_total += 1
-
-                ground_truth_words = batch.gt_texts[i].split(' ')
-                recognized_words = recognized[i].split(' ')
-                word_dist = editdistance.eval(ground_truth_words, recognized_words)
-                num_word_err += word_dist
-                num_word_total += len(ground_truth_words)
-
-                char_dist = editdistance.eval(recognized[i], batch.gt_texts[i])
-                num_char_err += char_dist
-                num_char_total += len(batch.gt_texts[i])
+                phrase_acc_metric.update_state(batch.gt_texts[i], recognized[i])
+                wer_metric.update_state(batch.gt_texts[i], recognized[i])
+                cer_metric.update_state(batch.gt_texts[i], recognized[i])
                 
-                print('[C_OK]' if char_dist == 0 else f'[C_ERR:{char_dist}]',
-                      '[W_OK]' if word_dist == 0 else f'[W_ERR:{word_dist}]',
-                      '[P_OK]' if batch.gt_texts[i] == recognized[i] else '[P_ERR]',
+                print(cer_metric.get_info(),
+                      wer_metric.get_info(),
+                      phrase_acc_metric.get_info(),
                       f"{batch.gt_texts[i]} -> {recognized[i]}")
 
         # print validation result
-        char_error_rate = num_char_err / num_char_total
-        word_error_rate = num_word_err / num_word_total
-        phrase_accuracy = num_phrase_ok / num_phrase_total
+        char_error_rate = cer_metric.result()
+        word_error_rate = wer_metric.result()
+        phrase_accuracy = phrase_acc_metric.result()
+        cer_metric.reset_states()
+        wer_metric.reset_states()
+        phrase_acc_metric.reset_states()
         print(f'Character error rate: {char_error_rate * 100.0}%.')
         print(f'Word error rate: {word_error_rate * 100.0}%')
         print(f'Phrase accuracy: {phrase_accuracy * 100.0}%.')
