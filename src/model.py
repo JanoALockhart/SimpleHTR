@@ -341,8 +341,8 @@ class Model:
                 loss = self.train_batch(batch)
                 print(f'Epoch: {epoch} Batch: {iter_info[0]}/{iter_info[1]} Loss: {loss}')
                 train_loss_in_epoch.append(loss)
-                # calculate training_CER and training_phrase_acc
 
+            train_CER, train_WER, train_phrase_acc, _ = self.validate(train_set)
             end_time = time.time()
             # validate
             val_CER, val_WER, val_phrase_acc, val_loss = self.validate(validation_set)
@@ -350,10 +350,14 @@ class Model:
             # write summary
             epoch_summary = EpochSummary(
                 epoch = epoch,
-                char_error_rate = val_CER,
-                word_error_rate= val_WER,
-                phrase_accuracies = val_phrase_acc,
-                average_train_loss = sum(train_loss_in_epoch) / len(train_loss_in_epoch),
+                train_cer=train_CER,
+                val_cer = val_CER,
+                train_wer=train_WER,
+                val_wer= val_WER,
+                train_phrase_acc=train_phrase_acc,
+                val_phrase_acc = val_phrase_acc,
+                train_loss = sum(train_loss_in_epoch) / len(train_loss_in_epoch),
+                val_loss=val_loss,
                 time_to_train_epoch = end_time-start_time
             )
             summary_writer.append(epoch_summary)
