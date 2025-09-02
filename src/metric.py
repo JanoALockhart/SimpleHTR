@@ -79,3 +79,21 @@ class PhraseAccuracy(Metric):
     def reset_states(self):
         self.num_phrase_ok = 0
         self.num_phrase_total = 0
+
+class Loss(Metric):
+    def __init__(self):
+        super().__init__()
+        self.loss_sum = 0
+        self.num_batches = 0
+
+    def update_state(self, loss):
+        self.loss_sum += loss
+        self.num_batches += 1
+        self.info = f"Batch: {self.num_batches}. Loss: {loss}"
+
+    def result(self):
+        return self.loss_sum / self.num_batches
+    
+    def reset_states(self):
+        self.loss_sum = 0
+        self.num_batches = 0
