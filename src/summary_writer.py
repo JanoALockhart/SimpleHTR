@@ -5,10 +5,14 @@ from dataclasses import dataclass, asdict
 @dataclass(frozen=True)
 class EpochSummary:
     epoch:int
-    char_error_rate:float
-    word_error_rate:float
-    phrase_accuracies:float
-    average_train_loss:float
+    train_cer:float
+    val_cer:float
+    train_wer:float
+    val_wer:float
+    train_phrase_acc:float
+    val_phrase_acc:float
+    train_loss:float
+    val_loss:float
     time_to_train_epoch:float 
 
 

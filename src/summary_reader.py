@@ -19,9 +19,9 @@ def plot_summary():
 
     epochs = [EpochSummary(**epoch_summary) for epoch_summary in data]
 
-    loss = [epoch_summary.average_train_loss for epoch_summary in epochs]
-    character_error_rate = [epoch_summary.char_error_rate for epoch_summary in epochs]
-    word_accuracy = [epoch_summary.phrase_accuracies for epoch_summary in epochs]
+    loss = [epoch_summary.train_loss for epoch_summary in epochs]
+    character_error_rate = [epoch_summary.val_cer for epoch_summary in epochs]
+    word_accuracy = [epoch_summary.val_phrase_acc for epoch_summary in epochs]
     
     plot_metric("Loss", loss)
     plot_metric("CER", character_error_rate)
