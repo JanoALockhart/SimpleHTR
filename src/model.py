@@ -11,7 +11,7 @@ import numpy as np
 import tensorflow as tf
 
 from dataset import Batch, Dataset
-from metric import CharacterErrorRate, PhraseAccuracy, WordErrorRate
+from metric import CharacterErrorRate, Loss, PhraseAccuracy, WordErrorRate
 from settings import Settings
 from preprocessor import Preprocessor
 from summary_writer import SummaryWriter, EpochSummary
@@ -345,8 +345,7 @@ class Model:
 
             end_time = time.time()
             # validate
-            # calculate validation loss
-            val_CER, val_WER, val_phrase_acc = self.validate(validation_set)
+            val_CER, val_WER, val_phrase_acc, val_loss = self.validate(validation_set)
 
             # write summary
             epoch_summary = EpochSummary(
@@ -385,12 +384,14 @@ class Model:
         cer_metric = CharacterErrorRate()
         wer_metric = WordErrorRate()
         phrase_acc_metric = PhraseAccuracy()
+        loss_metric = Loss()
         
         while validation_set.has_next():
             iter_info = validation_set.get_iterator_info()
             print(f'Batch: {iter_info[0]} / {iter_info[1]}')
             batch = validation_set.get_next()
-            recognized, _, val_loss = self.infer_batch(batch)
+            recognized, _, batch_loss = self.infer_batch(batch)
+            loss_metric.update_state(batch_loss)
 
             print('Ground truth -> Recognized')
             for i in range(len(recognized)):
@@ -407,13 +408,15 @@ class Model:
         char_error_rate = cer_metric.result()
         word_error_rate = wer_metric.result()
         phrase_accuracy = phrase_acc_metric.result()
+        val_loss = loss_metric.result()
         cer_metric.reset_states()
         wer_metric.reset_states()
         phrase_acc_metric.reset_states()
+        loss_metric.reset_states()
         print(f'Character error rate: {char_error_rate * 100.0}%.')
         print(f'Word error rate: {word_error_rate * 100.0}%')
         print(f'Phrase accuracy: {phrase_accuracy * 100.0}%.')
-        return char_error_rate, word_error_rate, phrase_accuracy
+        return char_error_rate, word_error_rate, phrase_accuracy, val_loss
 
 
     def infer(self, fn_img: Path) -> None:
