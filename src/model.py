@@ -337,16 +337,18 @@ class Model:
                 loss = self.train_batch(batch)
                 print(f'Epoch: {epoch} Batch: {iter_info[0]}/{iter_info[1]} Loss: {loss}')
                 train_loss_in_epoch.append(loss)
+                # calculate training_CER and training_Word_acc
 
             end_time = time.time()
             # validate
-            char_error_rate, word_accuracy = self.validate(validation_set)
+            # calculate validation loss
+            val_CER, val_word_acc = self.validate(validation_set)
 
             # write summary
             epoch_summary = EpochSummary(
                 epoch = epoch,
-                char_error_rate = char_error_rate,
-                word_accuracies = word_accuracy,
+                char_error_rate = val_CER,
+                word_accuracies = val_word_acc,
                 average_train_loss = sum(train_loss_in_epoch) / len(train_loss_in_epoch),
                 time_to_train_epoch = end_time-start_time
             )
@@ -356,9 +358,9 @@ class Model:
             train_loss_in_epoch = []
 
             # if best validation accuracy so far, save model parameters
-            if char_error_rate < best_char_error_rate:
+            if val_CER < best_char_error_rate:
                 print('Character error rate improved, save model')
-                best_char_error_rate = char_error_rate
+                best_char_error_rate = val_CER
                 no_improvement_since = 0
                 self.save()
             else:
