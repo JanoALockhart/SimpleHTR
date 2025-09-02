@@ -342,12 +342,13 @@ class Model:
             end_time = time.time()
             # validate
             # calculate validation loss
-            val_CER, val_phrase_acc = self.validate(validation_set)
+            val_CER, val_WER, val_phrase_acc = self.validate(validation_set)
 
             # write summary
             epoch_summary = EpochSummary(
                 epoch = epoch,
                 char_error_rate = val_CER,
+                word_error_rate= val_WER,
                 phrase_accuracies = val_phrase_acc,
                 average_train_loss = sum(train_loss_in_epoch) / len(train_loss_in_epoch),
                 time_to_train_epoch = end_time-start_time
@@ -373,7 +374,7 @@ class Model:
                 break
 
 
-    def validate(self, validation_set: Dataset) -> Tuple[float, float]:
+    def validate(self, validation_set: Dataset) -> Tuple[float, float, float]:
         """Validates NN."""
         print('Validate NN')
         validation_set.reset_iterator()
@@ -416,7 +417,7 @@ class Model:
         print(f'Character error rate: {char_error_rate * 100.0}%.')
         print(f'Word error rate: {word_error_rate * 100.0}%')
         print(f'Phrase accuracy: {phrase_accuracy * 100.0}%.')
-        return char_error_rate, phrase_accuracy
+        return char_error_rate, word_error_rate, phrase_accuracy
 
 
     def infer(self, fn_img: Path) -> None:

@@ -6,6 +6,7 @@ from dataclasses import dataclass, asdict
 class EpochSummary:
     epoch:int
     char_error_rate:float
+    word_error_rate:float
     phrase_accuracies:float
     average_train_loss:float
     time_to_train_epoch:float 
