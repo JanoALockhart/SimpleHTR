@@ -222,7 +222,7 @@ class Model:
     def train_batch(self, batch: Batch) -> float:
         """Feed a batch into the NN to train it."""
         num_batch_elements = len(batch.imgs)
-        max_text_len = batch.imgs[0].shape[0] // 4
+        max_text_len = batch.imgs[0].shape[0] // 4 # 256//4=64
         sparse = self.to_sparse(batch.gt_texts)
         eval_list = [self.optimizer, self.loss]
         feed_dict = {self.input_imgs: batch.imgs, self.gt_texts: sparse,
@@ -268,7 +268,7 @@ class Model:
         eval_list.append(self.loss)
 
         # sequence length depends on input image size (model downsizes width by 4)
-        max_text_len = batch.imgs[0].shape[0] // 4
+        max_text_len = batch.imgs[0].shape[0] // 4 #256//4 = 64
 
         # dict containing all tensor fed into the model
         feed_dict = {self.input_imgs: batch.imgs, self.gt_texts: self.to_sparse(batch.gt_texts), 
